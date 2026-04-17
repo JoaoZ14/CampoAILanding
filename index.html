@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2D3B2D">
+
+<title>AG Assist</title>
+
+<link rel="icon" href="assets/Logo CampoLead (1)-Photoroom.png" type="image/png">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --green-dark: #2D3B2D;
+  --green-light: #3D4F3D;
+  --bg-light: #F7F4EF;
+  --text: #3C3C3C;
+}
+
+html { scroll-behavior: smooth; }
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  line-height: 1.6;
+  background: #fff;
+}
+
+.container {
+  max-width: 1140px;
+  margin: auto;
+  padding-inline: clamp(1.25rem, 5vw, 2.5rem);
+}
+
+/* HEADER */
+header {
+  position: sticky;
+  top: 0;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid #eee;
+  z-index: 1000;
+}
+
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 72px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo img {
+  display: block;
+  height: 54px;
+  width: auto;
+  max-width: min(260px, 55vw);
+  object-fit: contain;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--green-dark);
+  font-weight: 500;
+}
+
+.menu-toggle {
+  display: none;
+  font-size: 24px;
+}
+
+/* BOTÕES */
+.btn {
+  padding: 12px 18px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-decoration: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
+}
+
+.btn-primary {
+  background: var(--green-dark);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--green-light);
+}
+
+.btn-secondary {
+  border: 1px solid var(--green-dark);
+  color: var(--green-dark);
+}
+
+.btn-secondary:hover {
+  background: var(--green-dark);
+  color: #fff;
+}
+
+/* SEÇÕES — padding-block aqui; padding-inline só em .container para não
+   sobrescrever quando section e .container estão no mesmo elemento */
+section {
+  padding-block: 7rem;
+  scroll-margin-top: 100px;
+}
+
+section h2 {
+  margin-bottom: 2.5rem;
+}
+
+.bg-light {
+  background: var(--bg-light);
+}
+
+/* HERO — texto à esquerda; imagem em tela cheia à direita (altura da seção) */
+.hero {
+  padding-block: 0;
+  padding-inline: 0;
+}
+
+.hero-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  min-height: min(88vh, 820px);
+}
+
+.hero-copy-wrap {
+  display: flex;
+  align-items: center;
+  padding-block: clamp(3rem, 7vw, 5.5rem);
+  padding-inline: clamp(1.25rem, 5vw, 2.5rem);
+  min-width: 0;
+}
+
+.hero-copy {
+  width: 100%;
+  max-width: 560px;
+}
+
+.hero-media {
+  position: relative;
+  overflow: hidden;
+  min-height: 100%;
+}
+
+.hero-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,1) 0%,
+    rgba(255,255,255,0.75) 18%,
+    rgba(255,255,255,0.2) 45%,
+    rgba(255,255,255,0) 65%
+  );
+}
+
+.hero h1 {
+  font-size: 48px;
+  line-height: 1.15;
+  color: var(--green-dark);
+  max-width: 640px;
+  letter-spacing: -0.5px;
+}
+
+.hero p {
+  margin-top: 18px;
+  max-width: 580px;
+}
+
+.hero-buttons {
+  margin-top: 30px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* PARA QUEM */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+
+.block h3 {
+  color: var(--green-dark);
+  margin-bottom: 6px;
+}
+
+/* COMO FUNCIONA — faixa em largura total; imagem ocupa altura inteira da área */
+section.como {
+  padding-inline: 0;
+  padding-bottom: 0;
+}
+
+.como-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  min-height: min(56vh, 520px);
+}
+
+.como-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+
+.como-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+.como-steps-side {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-inline: clamp(1.25rem, 5vw, 2.5rem);
+  padding-top: clamp(2.25rem, 7vh, 4rem);
+  min-width: 0;
+}
+
+.como-copy {
+  width: 100%;
+  max-width: 520px;
+  margin-inline-start: auto;
+}
+
+section.como .como-copy h2 {
+  margin-bottom: 2.5rem;
+}
+
+.como-steps-side .steps {
+  width: 100%;
+  max-width: none;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: none;
+}
+
+.step {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.step p {
+  margin: 0;
+  flex: 1;
+  line-height: 1.5;
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--green-dark);
+  background: var(--bg-light);
+  border-radius: 50%;
+}
+
+/* BENEFÍCIOS */
+.benefits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+}
+
+/* PLANOS */
+.plans-wrapper {
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+}
+
+.divider {
+  background: #ddd;
+}
+
+.plan {
+  padding: 2.75rem clamp(1.25rem, 4vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.price {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--green-dark);
+}
+
+.plan ul {
+  margin: 20px 0;
+  padding-left: 18px;
+}
+
+.plan li {
+  margin-bottom: 10px;
+}
+
+.plan--mensal {
+  background: rgba(45, 59, 45, 0.07);
+}
+
+/* FAQ */
+.faq {
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+.faq details {
+  border-bottom: 1px solid #e5e5e5;
+  padding: 18px 0;
+}
+
+.faq details:last-of-type {
+  border-bottom: none;
+}
+
+.faq summary {
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--green-dark);
+  padding: 6px 0 4px;
+  line-height: 1.45;
+}
+
+.faq summary::-webkit-details-marker {
+  color: var(--green-dark);
+}
+
+.faq details p {
+  margin: 12px 0 0;
+  padding-right: 0.5rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+/* FOOTER */
+footer {
+  background: var(--bg-light);
+  padding: 40px 0;
+  color: var(--green-dark);
+}
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+
+  .grid-3,
+  .benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .plans {
+    grid-template-columns: 1fr;
+  }
+
+  .divider {
+    display: none;
+  }
+
+  nav {
+    display: none;
+    position: absolute;
+    top: 72px;
+    right: 20px;
+    background: white;
+    padding: 20px;
+    border: 1px solid #eee;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  nav.active {
+    display: flex;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .hero h1 {
+    font-size: 34px;
+  }
+
+  .hero-media {
+    display: none;
+  }
+
+  .hero-shell {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .hero-copy-wrap {
+    padding-block: clamp(2.5rem, 10vw, 4rem);
+  }
+
+  .como-shell {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .como-media {
+    min-height: min(28vh, 220px);
+    order: -1;
+  }
+
+  .como-media img {
+    height: 100%;
+    min-height: min(26vh, 200px);
+  }
+
+  .como-steps-side {
+    justify-content: stretch;
+    padding-block: 2.25rem 1.5rem;
+  }
+
+  .como-copy {
+    margin-inline-start: 0;
+    max-width: none;
+  }
+
+  .como-steps-side .steps {
+    max-width: none;
+  }
+
+  section {
+    padding-block: 4.5rem;
+  }
+
+  section.como {
+    padding-bottom: 0;
+  }
+
+  section h2 {
+    margin-bottom: 2rem;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="container header-inner">
+    <a href="#" class="logo" aria-label="CampoLead — início">
+      <img
+        src="assets/Logo CampoLead (1)-Photoroom.png"
+        alt="CampoLead"
+        width="216"
+        height="54"
+        loading="eager"
+        decoding="async"
+      />
+    </a>
+
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
+    <nav id="menu">
+      <a href="#como">Como funciona</a>
+      <a href="#planos">Planos</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://wa.me/12183878223?text=Ol%C3%A1%21" class="btn btn-primary" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-shell">
+    <div class="hero-copy-wrap">
+      <div class="hero-copy">
+        <h1>Orientação prática para lavoura e rebanho, direto no WhatsApp</h1>
+        <p>Tire dúvidas, envie fotos e receba respostas claras para decisões rápidas no campo.</p>
+
+        <div class="hero-buttons">
+          <a href="https://wa.me/12183878223?text=Ol%C3%A1%21" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
+          <a href="#planos" class="btn btn-secondary">Ver planos</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-media" aria-hidden="true">
+      <img
+        src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=1600&q=80"
+        alt=""
+        loading="eager"
+      />
+    </div>
+  </div>
+</section>
+
+<section class="bg-light">
+  <div class="container">
+    <h2>Para quem é</h2>
+    <div class="grid-3">
+      <div class="block">
+        <h3>Produtor rural</h3>
+        <p>Decisões rápidas no dia a dia da lavoura</p>
+      </div>
+      <div class="block">
+        <h3>Pecuarista</h3>
+        <p>Apoio prático no manejo do rebanho</p>
+      </div>
+      <div class="block">
+        <h3>No campo</h3>
+        <p>Resolve dúvidas por mensagem ou foto</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="como" class="como">
+  <div class="como-shell">
+    <div class="como-media">
+      <img
+        src="assets/como-mockup-ag-assist.png"
+        alt="Conversa com o AG Assist no WhatsApp no celular"
+        loading="lazy"
+      />
+    </div>
+    <div class="como-steps-side">
+      <div class="como-copy">
+        <h2>Como funciona</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <p>Envie uma mensagem no WhatsApp</p>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <p>Descreva o problema ou envie uma foto</p>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <p>Receba orientação em poucos minutos</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-light">
+  <div class="container">
+    <h2>Benefícios</h2>
+    <div class="benefits">
+      <div>
+        <p>Respostas simples e diretas</p>
+        <p>Disponível a qualquer hora</p>
+        <p>Ajuda na decisão no campo</p>
+      </div>
+      <div>
+        <p>Envio de fotos para análise</p>
+        <p>Economia de tempo</p>
+        <p><strong>Não substitui profissional em urgência</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="planos" class="container">
+  <h2>Planos</h2>
+
+  <div class="plans-wrapper">
+    <div class="plans">
+
+      <div class="plan">
+        <div>
+          <h3>Gratuito</h3>
+          <p class="price">R$ 0</p>
+          <ul>
+            <li>Até 15 análises por mês para testar o serviço</li>
+            <li>Fila padrão • mesma base de respostas, com limite mensal</li>
+          </ul>
+        </div>
+        <a href="https://wa.me/12183878223?text=Ol%C3%A1%21" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">Começar</a>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="plan plan--mensal">
+        <div>
+          <h3>Mensal</h3>
+          <p class="price">R$ 29/mês</p>
+          <ul>
+            <li><strong>Análises ilimitadas</strong> — use o quanto precisar no mês</li>
+            <li><strong>Prioridade na fila</strong> — atendimento mais rápido nos horários de pico</li>
+            <li>Texto, fotos e áudios, com respostas detalhadas e no seu contexto</li>
+            <li>Orientações com passo a passo quando a dúvida pedir</li>
+            <li>Atendimento no WhatsApp que você já usa no dia a dia</li>
+          </ul>
+        </div>
+        <a href="#" class="btn btn-primary">Assinar</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="bg-light">
+  <div class="container">
+    <h2>Perguntas frequentes</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Funciona offline?</summary>
+        <p>Não. O AG Assist é atendido pelo <strong>WhatsApp</strong>, que depende de <strong>internet</strong> no celular (dados móveis ou Wi‑Fi) para enviar e receber mensagens, fotos e áudios. Sem conexão, o próprio WhatsApp não entrega nem sincroniza as conversas — não é limitação do serviço, e sim do funcionamento do app.</p>
+      </details>
+
+      <details>
+        <summary>Preciso instalar outro aplicativo?</summary>
+        <p>Não. Você usa só o <strong>WhatsApp</strong> que já está no aparelho. Não há app extra nem outro canal obrigatório.</p>
+      </details>
+
+      <details>
+        <summary>Posso enviar fotos e áudios?</summary>
+        <p>Sim. Pode mandar <strong>texto, fotos e áudios</strong> na conversa, como em qualquer contato do WhatsApp — inclusive para mostrar folhas, animal, equipamento ou situação no campo.</p>
+      </details>
+
+      <details>
+        <summary>O WhatsApp pode consumir meus dados móveis?</summary>
+        <p>Sim. Mensagens, imagens e áudios usam a <strong>internet do celular</strong> (ou Wi‑Fi). O consumo costuma ser pequeno para texto e foto; áudios e imagens maiores usam um pouco mais. Isso segue as regras da sua operadora e do próprio WhatsApp.</p>
+      </details>
+
+      <details>
+        <summary>Quanto tempo leva para responder?</summary>
+        <p>O tempo varia conforme fila e complexidade da pergunta. No <strong>plano Mensal</strong> as respostas têm <strong>prioridade</strong> em relação ao gratuito quando houver muita demanda.</p>
+      </details>
+
+      <details>
+        <summary>O que está incluso no gratuito e no mensal?</summary>
+        <p>Os <strong>mesmos tipos</strong> de atendimento (texto, fotos, áudios e nível de detalhe nas respostas). A diferença é o <strong>limite de análises por mês</strong> no gratuito e o <strong>uso ilimitado + fila prioritária</strong> no mensal, conforme descrito na seção Planos.</p>
+      </details>
+
+      <details>
+        <summary>Substitui visita de técnico ou agrônomo?</summary>
+        <p><strong>Não.</strong> É <strong>apoio por mensagem</strong> para dúvidas e orientação rápida. Não substitui diagnóstico presencial, receita agronômica oficial nem atendimento de emergência no campo — nesses casos procure um profissional ou serviço adequados na sua região.</p>
+      </details>
+
+      <details>
+        <summary>Meus dados e conversas ficam seguros?</summary>
+        <p>A conversa ocorre no <strong>WhatsApp</strong>, que usa a infraestrutura e a criptografia da Meta. Recomendamos não compartilhar senhas nem dados bancários no chat e seguir as boas práticas que você já usa no aplicativo.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>© AG Assist</p>
+  </div>
+</footer>
+
+<script>
+function toggleMenu() {
+  document.getElementById("menu").classList.toggle("active");
+}
+</script>
+
+</body>
+</html>
