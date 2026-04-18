@@ -3,22 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#002868">
+<meta name="theme-color" content="#2D3B2D">
 
-<title>TexAI — Assistente Agro para WhatsApp</title>
+<title>AG Assist</title>
 
-<link rel="icon" href="assets/Design sem nome (38)-Photoroom.png" type="image/png">
+<link rel="icon" href="assets/Logo CampoLead (1)-Photoroom.png" type="image/png">
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  /* Bandeira do Texas (Pantone aproximado / uso comum na web) */
-  --tx-blue: #002868;
-  --tx-red: #BF0A30;
-  --tx-white: #ffffff;
-  --bg-soft: #f2f5fa;
-  --text: #1e2a3d;
+  --green-dark: #2D3B2D;
+  --green-light: #3D4F3D;
+  --bg-light: #F7F4EF;
+  --text: #3C3C3C;
 }
 
 html { scroll-behavior: smooth; }
@@ -33,7 +31,7 @@ body {
   font-family: 'Inter', sans-serif;
   color: var(--text);
   line-height: 1.6;
-  background: var(--tx-white);
+  background: #fff;
 }
 
 .container {
@@ -42,26 +40,13 @@ body {
   padding-inline: clamp(1.25rem, 5vw, 2.5rem);
 }
 
-/* Faixa sutil inspirada na bandeira (hero / topo) */
-.flag-accent {
-  height: 4px;
-  background: linear-gradient(
-    90deg,
-    var(--tx-blue) 0%,
-    var(--tx-blue) 33.33%,
-    var(--tx-white) 33.33%,
-    var(--tx-white) 66.66%,
-    var(--tx-red) 66.66%,
-    var(--tx-red) 100%
-  );
-}
-
+/* HEADER */
 header {
   position: sticky;
   top: 0;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(0, 40, 104, 0.12);
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid #eee;
   z-index: 1000;
 }
 
@@ -80,9 +65,9 @@ header {
 
 .logo img {
   display: block;
-  height: 70px;
+  height: 54px;
   width: auto;
-  max-width: min(400px, 78vw);
+  max-width: min(260px, 55vw);
   object-fit: contain;
 }
 
@@ -94,16 +79,16 @@ nav {
 
 nav a {
   text-decoration: none;
-  color: var(--tx-blue);
+  color: var(--green-dark);
   font-weight: 500;
 }
 
 .menu-toggle {
   display: none;
   font-size: 24px;
-  color: var(--tx-blue);
 }
 
+/* BOTÕES */
 .btn {
   padding: 12px 18px;
   border-radius: 4px;
@@ -117,26 +102,26 @@ nav a {
 }
 
 .btn-primary {
-  background: var(--tx-blue);
-  color: var(--tx-white);
-  border: 1px solid transparent;
+  background: var(--green-dark);
+  color: #fff;
 }
 
 .btn-primary:hover {
-  background: #001a4a;
+  background: var(--green-light);
 }
 
 .btn-secondary {
-  border: 2px solid var(--tx-blue);
-  color: var(--tx-blue);
-  background: transparent;
+  border: 1px solid var(--green-dark);
+  color: var(--green-dark);
 }
 
 .btn-secondary:hover {
-  background: var(--tx-blue);
-  color: var(--tx-white);
+  background: var(--green-dark);
+  color: #fff;
 }
 
+/* SEÇÕES — padding-block aqui; padding-inline só em .container para não
+   sobrescrever quando section e .container estão no mesmo elemento */
 section {
   padding-block: 7rem;
   scroll-margin-top: 100px;
@@ -144,13 +129,13 @@ section {
 
 section h2 {
   margin-bottom: 2.5rem;
-  color: var(--tx-blue);
 }
 
 .bg-light {
-  background: var(--bg-soft);
+  background: var(--bg-light);
 }
 
+/* HERO — texto à esquerda; imagem em tela cheia à direita (altura da seção) */
 .hero {
   padding-block: 0;
   padding-inline: 0;
@@ -198,28 +183,19 @@ section h2 {
   z-index: 1;
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 0.82) 16%,
-    rgba(0, 40, 104, 0.12) 42%,
-    rgba(0, 40, 104, 0.05) 100%
+    rgba(255,255,255,1) 0%,
+    rgba(255,255,255,0.75) 18%,
+    rgba(255,255,255,0.2) 45%,
+    rgba(255,255,255,0) 65%
   );
 }
 
 .hero h1 {
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: 48px;
   line-height: 1.15;
-  color: var(--tx-blue);
+  color: var(--green-dark);
   max-width: 640px;
   letter-spacing: -0.5px;
-}
-
-.hero .hero-tag {
-  display: inline-block;
-  margin-top: 12px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--tx-red);
-  letter-spacing: 0.02em;
 }
 
 .hero p {
@@ -234,6 +210,7 @@ section h2 {
   flex-wrap: wrap;
 }
 
+/* PARA QUEM */
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -241,10 +218,11 @@ section h2 {
 }
 
 .block h3 {
-  color: var(--tx-blue);
+  color: var(--green-dark);
   margin-bottom: 6px;
 }
 
+/* COMO FUNCIONA — mockup em tamanho confortável à esquerda; passos à direita */
 section.como {
   padding-inline: 0;
   padding-bottom: 0;
@@ -270,8 +248,8 @@ section.como {
 
 .como-media img {
   width: auto;
-  max-width: min(280px, 46vw);
-  max-height: min(280px, 42vh);
+  max-width: min(320px, 46vw);
+  max-height: min(520px, 58vh);
   height: auto;
   object-fit: contain;
   object-position: center;
@@ -331,21 +309,22 @@ section.como .como-copy h2 {
   font-size: 1rem;
   font-weight: 700;
   line-height: 1;
-  color: var(--tx-white);
-  background: var(--tx-blue);
+  color: var(--green-dark);
+  background: var(--bg-light);
   border-radius: 50%;
-  border: 2px solid var(--tx-red);
 }
 
+/* BENEFÍCIOS */
 .benefits {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 48px;
 }
 
+/* PLANOS */
 .plans-wrapper {
-  border-top: 2px solid rgba(0, 40, 104, 0.15);
-  border-bottom: 2px solid rgba(0, 40, 104, 0.15);
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
 }
 
 .plans {
@@ -354,7 +333,7 @@ section.como .como-copy h2 {
 }
 
 .divider {
-  background: rgba(0, 40, 104, 0.15);
+  background: #ddd;
 }
 
 .plan {
@@ -367,7 +346,7 @@ section.como .como-copy h2 {
 .price {
   font-size: 36px;
   font-weight: 700;
-  color: var(--tx-blue);
+  color: var(--green-dark);
 }
 
 .plan ul {
@@ -380,17 +359,17 @@ section.como .como-copy h2 {
 }
 
 .plan--mensal {
-  background: rgba(0, 40, 104, 0.06);
-  box-shadow: inset 4px 0 0 var(--tx-red);
+  background: rgba(45, 59, 45, 0.07);
 }
 
+/* FAQ */
 .faq {
   max-width: 720px;
   margin-inline: auto;
 }
 
 .faq details {
-  border-bottom: 1px solid #e0e6ef;
+  border-bottom: 1px solid #e5e5e5;
   padding: 18px 0;
 }
 
@@ -401,9 +380,13 @@ section.como .como-copy h2 {
 .faq summary {
   font-weight: 600;
   cursor: pointer;
-  color: var(--tx-blue);
+  color: var(--green-dark);
   padding: 6px 0 4px;
   line-height: 1.45;
+}
+
+.faq summary::-webkit-details-marker {
+  color: var(--green-dark);
 }
 
 .faq details p {
@@ -413,19 +396,16 @@ section.como .como-copy h2 {
   color: var(--text);
 }
 
+/* FOOTER */
 footer {
-  background: var(--tx-blue);
+  background: var(--bg-light);
   padding: 40px 0;
-  color: var(--tx-white);
+  color: var(--green-dark);
 }
 
-footer a {
-  color: var(--tx-white);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
+/* RESPONSIVO */
 @media (max-width: 768px) {
+
   .grid-3,
   .benefits {
     grid-template-columns: 1fr;
@@ -444,12 +424,11 @@ footer a {
     position: absolute;
     top: 72px;
     right: 20px;
-    background: var(--tx-white);
+    background: white;
     padding: 20px;
-    border: 1px solid rgba(0, 40, 104, 0.15);
+    border: 1px solid #eee;
     flex-direction: column;
     gap: 16px;
-    box-shadow: 0 8px 24px rgba(0, 40, 104, 0.12);
   }
 
   nav.active {
@@ -458,6 +437,10 @@ footer a {
 
   .menu-toggle {
     display: block;
+  }
+
+  .hero h1 {
+    font-size: 34px;
   }
 
   .hero-media {
@@ -485,8 +468,8 @@ footer a {
   }
 
   .como-media img {
-    max-width: min(200px, 52vw);
-    max-height: min(200px, 38vh);
+    max-width: min(260px, 72vw);
+    max-height: min(480px, 62vh);
   }
 
   .como-steps-side {
@@ -520,28 +503,26 @@ footer a {
 
 <body>
 
-<div class="flag-accent" aria-hidden="true"></div>
-
 <header>
   <div class="container header-inner">
-    <a href="#" class="logo" aria-label="TexAI — início">
+    <a href="#" class="logo" aria-label="CampoLead — início">
       <img
-        src="assets/Gemini_Generated_Image_30uo830uo830uo83 (1)-Photoroom.png"
-        alt="TexAI — Assistente Agro para WhatsApp"
-        width="377"
-        height="70"
+        src="assets/Logo CampoLead (1)-Photoroom.png"
+        alt="CampoLead"
+        width="216"
+        height="54"
         loading="eager"
         decoding="async"
       />
     </a>
 
-    <div class="menu-toggle" onclick="toggleMenu()" role="button" tabindex="0" aria-label="Abrir menu">☰</div>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
 
     <nav id="menu">
       <a href="#como">Como funciona</a>
       <a href="#planos">Planos</a>
       <a href="#faq">FAQ</a>
-      <a href="https://wa.me/15551234567?text=Ol%C3%A1%21%20Sou%20o%20TexAI." class="btn btn-primary" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <a href="https://wa.me/12183878223?text=Ol%C3%A1%21" class="btn btn-primary" target="_blank" rel="noopener noreferrer">WhatsApp</a>
     </nav>
   </div>
 </header>
@@ -550,12 +531,11 @@ footer a {
   <div class="hero-shell">
     <div class="hero-copy-wrap">
       <div class="hero-copy">
-        <h1>Inteligência artificial no agro, direto no WhatsApp</h1>
-        <span class="hero-tag">Assistente Agro para WhatsApp</span>
-        <p>Orientação prática para lavoura e rebanho, direto no WhatsApp — tire dúvidas, envie fotos e receba respostas claras para decidir rápido no campo.</p>
+        <h1>Orientação prática para lavoura e rebanho, direto no WhatsApp</h1>
+        <p>Tire dúvidas, envie fotos e receba respostas claras para decisões rápidas no campo.</p>
 
         <div class="hero-buttons">
-          <a href="https://wa.me/15551234567?text=Ol%C3%A1%21%20Sou%20o%20TexAI." class="btn btn-primary" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
+          <a href="https://wa.me/12183878223?text=Ol%C3%A1%21" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
           <a href="#planos" class="btn btn-secondary">Ver planos</a>
         </div>
       </div>
@@ -563,7 +543,7 @@ footer a {
 
     <div class="hero-media" aria-hidden="true">
       <img
-        src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80"
+        src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=1600&q=80"
         alt=""
         loading="eager"
       />
@@ -585,7 +565,7 @@ footer a {
       </div>
       <div class="block">
         <h3>No campo</h3>
-        <p>Dúvidas por mensagem ou foto, onde você estiver</p>
+        <p>Resolve dúvidas por mensagem ou foto</p>
       </div>
     </div>
   </div>
@@ -595,8 +575,8 @@ footer a {
   <div class="como-shell">
     <div class="como-media">
       <img
-        src="assets/Design sem nome (38)-Photoroom.png"
-        alt="Ícone TexAI — folha e estrela solitária"
+        src="assets/como-mockup-ag-assist.png"
+        alt="Conversa com o AG Assist no WhatsApp no celular"
         loading="lazy"
       />
     </div>
@@ -655,7 +635,7 @@ footer a {
             <li>Fila padrão • mesma base de respostas, com limite mensal</li>
           </ul>
         </div>
-        <a href="https://wa.me/15551234567?text=Ol%C3%A1%21%20Sou%20o%20TexAI." class="btn btn-secondary" target="_blank" rel="noopener noreferrer">Começar</a>
+        <a href="https://wa.me/12183878223?text=Ol%C3%A1%21" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">Começar</a>
       </div>
 
       <div class="divider"></div>
@@ -686,7 +666,7 @@ footer a {
     <div class="faq">
       <details>
         <summary>Funciona offline?</summary>
-        <p>Não. O TexAI é atendido pelo <strong>WhatsApp</strong>, que depende de <strong>internet</strong> no celular (dados móveis ou Wi‑Fi) para enviar e receber mensagens, fotos e áudios. Sem conexão, o próprio WhatsApp não entrega nem sincroniza as conversas — não é limitação do serviço, e sim do funcionamento do app.</p>
+        <p>Não. O AG Assist é atendido pelo <strong>WhatsApp</strong>, que depende de <strong>internet</strong> no celular (dados móveis ou Wi‑Fi) para enviar e receber mensagens, fotos e áudios. Sem conexão, o próprio WhatsApp não entrega nem sincroniza as conversas — não é limitação do serviço, e sim do funcionamento do app.</p>
       </details>
 
       <details>
@@ -729,7 +709,7 @@ footer a {
 
 <footer>
   <div class="container">
-    <p>© TexAI — Assistente Agro para WhatsApp</p>
+    <p>© AG Assist</p>
   </div>
 </footer>
 
