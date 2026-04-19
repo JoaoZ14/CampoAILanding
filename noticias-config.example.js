@@ -1,9 +1,11 @@
 /**
- * O site NÃO usa mais chave no navegador.
+ * O site NÃO usa chave no navegador.
  *
- * Atualize as notícias assim:
- *   1) GitHub: secret GNEWS_API_KEY + workflow "Atualizar notícias (GNews)" (diário às 12h BRT).
- *   2) Local: na pasta do projeto, com Node 18+:
- *        PowerShell:  $env:GNEWS_API_KEY="sua_chave"; npm run noticias:fetch
- *        Depois faça commit do noticias.json se quiser publicar o cache.
+ * Atualizar notícias:
+ *   1) Copie .env.example para .env e preencha GNEWS_API_KEY (não commite .env).
+ *   2) npm install
+ *   3) npm run noticias:fetch   — uma vez manual
+ *   4) npm run noticias:daemon  — Node fica rodando; todo dia ~12h (Brasília) roda o fetch
+ *
+ * GitHub Actions (opcional): secret GNEWS_API_KEY + workflow update-noticias.yml
  */

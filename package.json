@@ -2,6 +2,11 @@
   "name": "campoai-landing",
   "private": true,
   "scripts": {
-    "noticias:fetch": "node scripts/fetch-gnews.mjs"
+    "noticias:fetch": "node -r dotenv/config scripts/fetch-gnews.mjs",
+    "noticias:daemon": "node scripts/noticias-daemon.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "node-cron": "^3.0.3"
   }
 }
