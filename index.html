@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#2a382a">
 <meta name="description" content="Orientação prática para lavoura e rebanho pelo WhatsApp. Tire dúvidas, envie fotos e receba respostas rápidas no campo. Planos gratuito e mensal.">
 
+<!-- Netlify + notícias na VPS: URL absoluta HTTPS do noticias.json (ex.: https://noticias.seudominio.com/noticias.json). Vazio = usa noticias.json no mesmo host. -->
+<meta name="campoai-noticias-json" content="https://agassist.duckdns.org/noticias.json">
+
 <title>AG Assist</title>
 
 <link rel="icon" href="assets/Logo CampoLead (1)-Photoroom.png" type="image/png">
@@ -935,7 +938,7 @@ footer p {
 
 <section id="noticias" class="container" aria-labelledby="noticias-titulo">
   <h2 id="noticias-titulo">Notícias do agro</h2>
-  <p class="noticias-lead">Lista em cache (<code>noticias.json</code>): o job diário acrescenta até 10 matérias e mantém no máximo 60, apagando as mais antigas por data de publicação. A API da GNews não roda no navegador de cada visitante.</p>
+  <p class="noticias-lead">Lista em cache: o arquivo é atualizado no servidor (até 10 por dia, máx. 60). Com site no Netlify, configure a URL em <code>&lt;meta name="campoai-noticias-json" content="https://…/noticias.json"&gt;</code>. A API da GNews não roda no navegador.</p>
 
   <p id="noticias-atualizado" class="noticias-atualizado" hidden aria-live="polite"></p>
 
@@ -1155,10 +1158,19 @@ footer p {
     }
   }
 
-  var NOTICIAS_LS = "campoai-noticias-cache";
+  function noticiasJsonUrl() {
+    var w = typeof window.__CAMPOAI_NOTICIAS_JSON__ === "string" ? window.__CAMPOAI_NOTICIAS_JSON__.trim() : "";
+    if (w && /^https?:\/\//i.test(w)) return w;
+    var meta = document.querySelector('meta[name="campoai-noticias-json"]');
+    var c = meta && meta.getAttribute("content") ? meta.getAttribute("content").trim() : "";
+    if (c && /^https?:\/\//i.test(c)) return c;
+    return "noticias.json";
+  }
+
+  var NOTICIAS_LS = "campoai-noticias-cache::" + noticiasJsonUrl();
 
   function loadFromJson() {
-    return fetch("noticias.json", { cache: "no-store" })
+    return fetch(noticiasJsonUrl(), { cache: "no-store", credentials: "omit" })
       .then(function (r) {
         if (!r.ok) throw new Error("noticias");
         return r.json();
