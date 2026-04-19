@@ -1,25 +1,40 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" id="top">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#2D3B2D">
+<meta name="theme-color" content="#2a382a">
+<meta name="description" content="Orientação prática para lavoura e rebanho pelo WhatsApp. Tire dúvidas, envie fotos e receba respostas rápidas no campo. Planos gratuito e mensal.">
 
 <title>AG Assist</title>
 
 <link rel="icon" href="assets/Logo CampoLead (1)-Photoroom.png" type="image/png">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --green-dark: #2D3B2D;
-  --green-light: #3D4F3D;
-  --bg-light: #F7F4EF;
-  --text: #3C3C3C;
+  /* Verde principal (folha / mata) */
+  --green-dark: #2a382a;
+  --green-light: #3d4f3d;
+  /* Neutros */
+  --bg-light: #f6f3ec;
+  --text: #3a3a38;
+  --text-muted: #5c5c58;
+  /* Acento “campo”: terra / trigo (secundária, sem competir com o verde) */
+  --field: #a97440;
+  --field-dark: #8a5f36;
+  --field-soft: rgba(169, 116, 64, 0.14);
+  --field-line: rgba(169, 116, 64, 0.35);
+  --radius: 6px;
+  --shadow-sm: 0 1px 2px rgba(42, 56, 42, 0.06);
 }
 
 html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
 
 * {
   margin: 0;
@@ -28,10 +43,45 @@ html { scroll-behavior: smooth; }
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   color: var(--text);
-  line-height: 1.6;
-  background: #fff;
+  line-height: 1.65;
+  background: #fdfcfa;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--field-soft);
+  color: var(--green-dark);
+}
+
+:focus-visible {
+  outline: 2px solid var(--field);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -120px;
+  z-index: 2000;
+  padding: 0.55rem 1rem;
+  background: var(--green-dark);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus-visible {
+  top: 0.75rem;
+}
+
+body.menu-open {
+  overflow: hidden;
 }
 
 .container {
@@ -44,13 +94,15 @@ body {
 header {
   position: sticky;
   top: 0;
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(6px);
-  border-bottom: 1px solid #eee;
+  background: rgba(253, 252, 250, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(42, 56, 42, 0.08);
+  box-shadow: var(--shadow-sm);
   z-index: 1000;
 }
 
 .header-inner {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -81,29 +133,64 @@ nav a {
   text-decoration: none;
   color: var(--green-dark);
   font-weight: 500;
+  font-size: 0.95rem;
+}
+
+nav a:not(.btn):hover {
+  color: var(--field-dark);
 }
 
 .menu-toggle {
   display: none;
-  font-size: 24px;
+  font-size: 1.35rem;
+  line-height: 1;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(42, 56, 42, 0.12);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--green-dark);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nav-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .nav-backdrop.is-open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgba(42, 56, 42, 0.22);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 /* BOTÕES */
 .btn {
-  padding: 12px 18px;
-  border-radius: 4px;
+  padding: 0.7rem 1.15rem;
+  border-radius: var(--radius);
   font-weight: 600;
+  font-size: 0.95rem;
   text-decoration: none;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-primary {
   background: var(--green-dark);
   color: #fff;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
 }
 
 .btn-primary:hover {
@@ -111,13 +198,15 @@ nav a {
 }
 
 .btn-secondary {
-  border: 1px solid var(--green-dark);
-  color: var(--green-dark);
+  border: 1px solid var(--field-line);
+  color: var(--field-dark);
+  background: #fff;
 }
 
 .btn-secondary:hover {
-  background: var(--green-dark);
-  color: #fff;
+  background: var(--field-soft);
+  border-color: var(--field);
+  color: var(--green-dark);
 }
 
 /* SEÇÕES — padding-block aqui; padding-inline só em .container para não
@@ -128,7 +217,16 @@ section {
 }
 
 section h2 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: clamp(1.65rem, 2.5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   margin-bottom: 2.5rem;
+  color: var(--green-dark);
+  padding-bottom: 0.65rem;
+  border-bottom: 2px solid var(--field-line);
+  max-width: 42rem;
 }
 
 .bg-light {
@@ -191,16 +289,20 @@ section h2 {
 }
 
 .hero h1 {
-  font-size: 48px;
-  line-height: 1.15;
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: clamp(2rem, 4.2vw, 3rem);
+  line-height: 1.12;
   color: var(--green-dark);
   max-width: 640px;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.03em;
+  font-weight: 700;
 }
 
 .hero p {
-  margin-top: 18px;
-  max-width: 580px;
+  margin-top: 1.15rem;
+  max-width: 34rem;
+  font-size: 1.05rem;
+  color: var(--text-muted);
 }
 
 .hero-buttons {
@@ -219,7 +321,14 @@ section h2 {
 
 .block h3 {
   color: var(--green-dark);
-  margin-bottom: 6px;
+  margin-bottom: 0.4rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.block p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 
 /* COMO FUNCIONA — faixa em largura total; imagem ocupa altura inteira da área */
@@ -305,8 +414,9 @@ section.como .como-copy h2 {
   font-size: 1rem;
   font-weight: 700;
   line-height: 1;
-  color: var(--green-dark);
-  background: var(--bg-light);
+  color: var(--field-dark);
+  background: var(--field-soft);
+  border: 1px solid var(--field-line);
   border-radius: 50%;
 }
 
@@ -317,10 +427,31 @@ section.como .como-copy h2 {
   gap: 48px;
 }
 
+.benefits p {
+  position: relative;
+  padding-left: 1.1rem;
+  margin-bottom: 0.65rem;
+  color: var(--text-muted);
+  font-size: 0.98rem;
+}
+
+.benefits p::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--field);
+}
+
 /* PLANOS */
 .plans-wrapper {
-  border-top: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid rgba(42, 56, 42, 0.1);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .plans {
@@ -329,7 +460,13 @@ section.como .como-copy h2 {
 }
 
 .divider {
-  background: #ddd;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(169, 116, 64, 0.25) 20%,
+    rgba(169, 116, 64, 0.25) 80%,
+    transparent
+  );
 }
 
 .plan {
@@ -354,8 +491,146 @@ section.como .como-copy h2 {
   margin-bottom: 10px;
 }
 
+.plan h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--green-dark);
+}
+
 .plan--mensal {
-  background: rgba(45, 59, 45, 0.07);
+  background: linear-gradient(160deg, var(--field-soft) 0%, rgba(42, 56, 42, 0.05) 100%);
+}
+
+/* NOTÍCIAS */
+.noticias-lead {
+  color: var(--text-muted);
+  max-width: 40rem;
+  margin: -1.25rem 0 2rem;
+  font-size: 0.98rem;
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2.2vw, 1.5rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.news-card {
+  border: 1px solid rgba(42, 56, 42, 0.1);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.news-card:hover {
+  box-shadow: 0 10px 32px rgba(42, 56, 42, 0.1);
+  border-color: var(--field-line);
+}
+
+.news-card__link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+}
+
+.news-card__media {
+  aspect-ratio: 16 / 10;
+  background: var(--bg-light);
+}
+
+.news-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.news-card__media--empty {
+  background: linear-gradient(145deg, var(--field-soft), rgba(42, 56, 42, 0.06));
+}
+
+.news-card__body {
+  padding: 1rem 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.35rem;
+}
+
+.news-card__meta {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--field-dark);
+  font-weight: 600;
+}
+
+.news-card__title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--green-dark);
+}
+
+.news-card__cta {
+  margin-top: auto;
+  padding-top: 0.55rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--field-dark);
+}
+
+.news-card__link:hover .news-card__cta {
+  color: var(--green-dark);
+}
+
+.noticias-foot {
+  margin-top: 1.75rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  max-width: 42rem;
+  line-height: 1.5;
+}
+
+.noticias-status {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.noticias-status[hidden] {
+  display: none;
+}
+
+.noticias-atualizado {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: -0.75rem 0 1.35rem;
+  line-height: 1.45;
+}
+
+.noticias-atualizado[hidden] {
+  display: none;
+}
+
+.news-empty {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  padding: 1rem 0;
+}
+
+@media (max-width: 920px) {
+  .news-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* FAQ */
@@ -365,7 +640,7 @@ section.como .como-copy h2 {
 }
 
 .faq details {
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid rgba(42, 56, 42, 0.08);
   padding: 18px 0;
 }
 
@@ -377,8 +652,11 @@ section.como .como-copy h2 {
   font-weight: 600;
   cursor: pointer;
   color: var(--green-dark);
-  padding: 6px 0 4px;
+  padding: 0.65rem 0 0.5rem;
   line-height: 1.45;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 
 .faq summary::-webkit-details-marker {
@@ -395,8 +673,14 @@ section.como .como-copy h2 {
 /* FOOTER */
 footer {
   background: var(--bg-light);
-  padding: 40px 0;
+  padding: 2.75rem 0;
   color: var(--green-dark);
+  border-top: 3px solid var(--field-line);
+}
+
+footer p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
 /* RESPONSIVO */
@@ -418,17 +702,41 @@ footer {
   nav {
     display: none;
     position: absolute;
-    top: 72px;
-    right: 20px;
-    background: white;
-    padding: 20px;
-    border: 1px solid #eee;
+    top: calc(100% + 6px);
+    right: 0;
+    left: auto;
+    min-width: min(280px, calc(100vw - 2.5rem));
+    background: #fff;
+    padding: 0.75rem 1rem 1rem;
+    border: 1px solid rgba(42, 56, 42, 0.1);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 40px rgba(42, 56, 42, 0.12);
     flex-direction: column;
-    gap: 16px;
+    align-items: stretch;
+    gap: 4px;
+    z-index: 1001;
   }
 
   nav.active {
     display: flex;
+  }
+
+  nav.active a:not(.btn) {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding-inline: 0.35rem;
+    border-radius: 4px;
+  }
+
+  nav.active a:not(.btn):active {
+    background: var(--field-soft);
+  }
+
+  nav.active .btn {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.35rem;
   }
 
   .menu-toggle {
@@ -436,7 +744,7 @@ footer {
   }
 
   .hero h1 {
-    font-size: 34px;
+    font-size: clamp(1.75rem, 6vw, 2.25rem);
   }
 
   .hero-media {
@@ -492,15 +800,21 @@ footer {
   section h2 {
     margin-bottom: 2rem;
   }
+
+  .news-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
 
 <body>
 
+<a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
+
 <header>
   <div class="container header-inner">
-    <a href="#" class="logo" aria-label="CampoLead — início">
+    <a href="#top" class="logo" aria-label="CampoLead — início">
       <img
         src="assets/Logo CampoLead (1)-Photoroom.png"
         alt="CampoLead"
@@ -511,17 +825,21 @@ footer {
       />
     </a>
 
-    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <button type="button" id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="menu" aria-label="Abrir menu">☰</button>
 
-    <nav id="menu">
+    <nav id="menu" aria-label="Principal">
       <a href="#como">Como funciona</a>
+      <a href="#noticias">Notícias</a>
       <a href="#planos">Planos</a>
       <a href="#faq">FAQ</a>
-      <a href="https://wa.me/12183878223?text=Ol%C3%A1%21" class="btn btn-primary" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer">WhatsApp</a>
     </nav>
   </div>
 </header>
 
+<button type="button" id="nav-backdrop" class="nav-backdrop" aria-label="Fechar menu" tabindex="-1" hidden></button>
+
+<main id="conteudo-principal" tabindex="-1">
 <section class="hero">
   <div class="hero-shell">
     <div class="hero-copy-wrap">
@@ -530,7 +848,7 @@ footer {
         <p>Tire dúvidas, envie fotos e receba respostas claras para decisões rápidas no campo.</p>
 
         <div class="hero-buttons">
-          <a href="https://wa.me/12183878223?text=Ol%C3%A1%21" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
+          <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
           <a href="#planos" class="btn btn-secondary">Ver planos</a>
         </div>
       </div>
@@ -615,6 +933,19 @@ footer {
   </div>
 </section>
 
+<section id="noticias" class="container" aria-labelledby="noticias-titulo">
+  <h2 id="noticias-titulo">Notícias do agro</h2>
+  <p class="noticias-lead">Lista em cache (<code>noticias.json</code>): o job diário acrescenta até 10 matérias e mantém no máximo 60, apagando as mais antigas por data de publicação. A API da GNews não roda no navegador de cada visitante.</p>
+
+  <p id="noticias-atualizado" class="noticias-atualizado" hidden aria-live="polite"></p>
+
+  <p id="noticias-status" class="noticias-status" role="status">Carregando notícias…</p>
+
+  <ul id="noticias-grid" class="news-grid" aria-live="polite" aria-busy="true"></ul>
+
+  <p class="noticias-foot">Conteúdo das matérias é de responsabilidade dos veículos. O arquivo é montado pela <a href="https://gnews.io/" target="_blank" rel="noopener noreferrer">GNews</a> via <code>scripts/fetch-gnews.mjs</code> (variáveis <code>GNEWS_MAX_ARTICLES</code>, <code>GNEWS_ARCHIVE_MAX</code>) e GitHub Actions com o secret <code>GNEWS_API_KEY</code>. Quem visita o site só lê <code>noticias.json</code>. Se o arquivo não carregar, o navegador tenta uma cópia salva anteriormente; se não houver, aparecem links fixos de apoio.</p>
+</section>
+
 <section id="planos" class="container">
   <h2>Planos</h2>
 
@@ -630,7 +961,7 @@ footer {
             <li>Fila padrão • mesma base de respostas, com limite mensal</li>
           </ul>
         </div>
-        <a href="https://wa.me/12183878223?text=Ol%C3%A1%21" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">Começar</a>
+        <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Quero%20come%C3%A7ar%20no%20plano%20gratuito." class="btn btn-secondary" target="_blank" rel="noopener noreferrer">Começar</a>
       </div>
 
       <div class="divider"></div>
@@ -647,7 +978,7 @@ footer {
             <li>Atendimento no WhatsApp que você já usa no dia a dia</li>
           </ul>
         </div>
-        <a href="#" class="btn btn-primary">Assinar</a>
+        <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Quero%20assinar%20o%20plano%20mensal%20%28R%24%2029%2Fm%C3%AAs%29." class="btn btn-primary" target="_blank" rel="noopener noreferrer">Assinar</a>
       </div>
 
     </div>
@@ -701,6 +1032,7 @@ footer {
     </div>
   </div>
 </section>
+</main>
 
 <footer>
   <div class="container">
@@ -709,9 +1041,211 @@ footer {
 </footer>
 
 <script>
-function toggleMenu() {
-  document.getElementById("menu").classList.toggle("active");
-}
+(function () {
+  var nav = document.getElementById("menu");
+  var btn = document.getElementById("menu-toggle");
+  var backdrop = document.getElementById("nav-backdrop");
+  function setMenuOpen(open) {
+    if (!nav || !btn) return;
+    nav.classList.toggle("active", open);
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    btn.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+    document.body.classList.toggle("menu-open", open);
+    if (backdrop) {
+      backdrop.classList.toggle("is-open", open);
+      backdrop.hidden = !open;
+    }
+  }
+
+  function closeMenu() {
+    setMenuOpen(false);
+  }
+
+  function toggleMenu() {
+    setMenuOpen(!nav.classList.contains("active"));
+  }
+
+  if (btn) btn.addEventListener("click", toggleMenu);
+
+  if (backdrop) backdrop.addEventListener("click", closeMenu);
+
+  if (nav) {
+    nav.querySelectorAll("a").forEach(function (a) {
+      a.addEventListener("click", closeMenu);
+    });
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeMenu();
+  });
+
+  window.addEventListener("resize", function () {
+    if (!window.matchMedia("(max-width: 768px)").matches) closeMenu();
+  });
+})();
+</script>
+
+<script>
+(function () {
+  var grid = document.getElementById("noticias-grid");
+  var statusEl = document.getElementById("noticias-status");
+  var atualizadoEl = document.getElementById("noticias-atualizado");
+  if (!grid) return;
+
+  var fallbackItems = [
+    {
+      title: "Notícias e comunicados do Ministério da Agricultura",
+      url: "https://www.gov.br/agricultura/pt-br/canais_atendimento/imprensa/noticias",
+      source: "MAPA",
+      publishedAt: "",
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad371?auto=format&fit=crop&w=800&q=70"
+    },
+    {
+      title: "Pesquisa, tecnologia e notícias da Embrapa",
+      url: "https://www.embrapa.br/",
+      source: "Embrapa",
+      publishedAt: "",
+      image: ""
+    },
+    {
+      title: "Informação e análise para o agronegócio",
+      url: "https://www.canalrural.com.br/",
+      source: "Canal Rural",
+      publishedAt: "",
+      image: ""
+    }
+  ];
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function safeUrl(u) {
+    var s = String(u || "").trim();
+    if (!/^https?:\/\//i.test(s)) return "https://www.gov.br/agricultura/";
+    try {
+      var parsed = new URL(s);
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
+    } catch (e) {}
+    return "https://www.gov.br/agricultura/";
+  }
+
+  function safeImageUrl(u) {
+    var s = String(u || "").trim();
+    if (!/^https?:\/\//i.test(s)) return "";
+    try {
+      var parsed = new URL(s);
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
+    } catch (e) {}
+    return "";
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "";
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+    } catch (e) {
+      return "";
+    }
+  }
+
+  var NOTICIAS_LS = "campoai-noticias-cache";
+
+  function loadFromJson() {
+    return fetch("noticias.json", { cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("noticias");
+        return r.json();
+      })
+      .then(function (data) {
+        try {
+          if (data && Array.isArray(data.items) && data.items.length) {
+            localStorage.setItem(NOTICIAS_LS, JSON.stringify(data));
+          }
+        } catch (e) {}
+        var items = data && Array.isArray(data.items) ? data.items : [];
+        var list = items.length ? items : fallbackItems;
+        var fetchedAt = data && data.fetchedAt ? data.fetchedAt : null;
+        return { items: list, fetchedAt: fetchedAt };
+      })
+      .catch(function () {
+        try {
+          var raw = localStorage.getItem(NOTICIAS_LS);
+          if (raw) {
+            var data = JSON.parse(raw);
+            var items = data && Array.isArray(data.items) ? data.items : [];
+            if (items.length) {
+              return { items: items, fetchedAt: data.fetchedAt || null };
+            }
+          }
+        } catch (e) {}
+        return { items: fallbackItems, fetchedAt: null };
+      });
+  }
+
+  function showCacheStamp(iso) {
+    if (!atualizadoEl || !iso) return;
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return;
+      atualizadoEl.textContent =
+        "Última atualização do cache: " +
+        d.toLocaleString("pt-BR", { dateStyle: "medium", timeStyle: "short" }) +
+        " (horário local do seu aparelho).";
+      atualizadoEl.hidden = false;
+    } catch (e) {}
+  }
+
+  function render(items) {
+    if (!items.length) {
+      grid.innerHTML = '<li class="news-empty">Nenhuma notícia cadastrada no momento.</li>';
+      grid.setAttribute("aria-busy", "false");
+      return;
+    }
+
+    var html = items.map(function (item) {
+      var url = safeUrl(item.url);
+      var title = escapeHtml(item.title || "Sem título");
+      var source = escapeHtml(item.source || "Fonte");
+      var dateStr = formatDate(item.publishedAt);
+      var meta = source + (dateStr ? " · " + dateStr : "");
+      var imgUrl = safeImageUrl(item.image);
+      var media = imgUrl
+        ? '<div class="news-card__media"><img src="' + escapeHtml(imgUrl) + '" alt="" loading="lazy" decoding="async" width="640" height="400"></div>'
+        : '<div class="news-card__media news-card__media--empty" aria-hidden="true"></div>';
+
+      return (
+        '<li class="news-card">' +
+        '<a class="news-card__link" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' +
+        media +
+        '<div class="news-card__body">' +
+        '<p class="news-card__meta">' + meta + "</p>" +
+        '<h3 class="news-card__title">' + title + "</h3>" +
+        '<span class="news-card__cta">Abrir link</span>' +
+        "</div></a></li>"
+      );
+    }).join("");
+
+    grid.innerHTML = html;
+    grid.setAttribute("aria-busy", "false");
+  }
+
+  function doneLoading() {
+    if (statusEl) statusEl.hidden = true;
+  }
+
+  loadFromJson().then(function (res) {
+    render(res.items);
+    showCacheStamp(res.fetchedAt);
+    doneLoading();
+  });
+})();
 </script>
 
 </body>

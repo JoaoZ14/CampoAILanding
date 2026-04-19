@@ -1,0 +1,7 @@
+{
+  "name": "campoai-landing",
+  "private": true,
+  "scripts": {
+    "noticias:fetch": "node scripts/fetch-gnews.mjs"
+  }
+}
