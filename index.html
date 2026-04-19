@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#2a382a">
-<meta name="description" content="Orientação prática para lavoura e rebanho pelo WhatsApp. Tire dúvidas, envie fotos e receba respostas rápidas no campo. Planos gratuito e mensal.">
+<meta name="description" content="Orientação prática para lavoura e rebanho pelo WhatsApp. Tire dúvidas, envie fotos e receba respostas rápidas no campo. Planos gratuito e mensal (mensal com 30 dias de teste).">
 
-<!-- Netlify + notícias na VPS: URL absoluta HTTPS sdo noticias.json (ex.: https://noticias.seudominio.com/noticias.json). Vazio = usa noticias.json no mesmo host. -->
+<!-- Netlify + notícias na VPS: URL HTTPS do noticias.json. Em localhost / IP da rede local o script ignora isto e pede noticias.json na mesma origem (a VPS só libera CORS para o Netlify). Vazio = noticias.json no mesmo host. -->
 <meta name="campoai-noticias-json" content="https://agassist.duckdns.org/noticias.json">
 
 <title>AG Assist</title>
@@ -322,6 +322,18 @@ section h2 {
   gap: 40px;
 }
 
+.grid-audiencia {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 40px;
+}
+
+@media (max-width: 960px) {
+  .grid-audiencia {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .block h3 {
   color: var(--green-dark);
   margin-bottom: 0.4rem;
@@ -504,12 +516,64 @@ section.como .como-copy h2 {
   background: linear-gradient(160deg, var(--field-soft) 0%, rgba(42, 56, 42, 0.05) 100%);
 }
 
+.plan-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--field-dark);
+  background: rgba(169, 116, 64, 0.2);
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius);
+  margin-bottom: 0.75rem;
+}
+
 /* NOTÍCIAS */
-.noticias-lead {
-  color: var(--text-muted);
-  max-width: 40rem;
-  margin: -1.25rem 0 2rem;
-  font-size: 0.98rem;
+.noticias-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.noticias-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+}
+
+.noticias-wrap--collapsed {
+  /* altura fina até o JS medir o 3.º card (evita um frame “aberto”) */
+  max-height: 22rem;
+}
+
+.noticias-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  height: clamp(5.5rem, 22vw, 8.5rem);
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(253, 252, 250, 0) 0%,
+    rgba(253, 252, 250, 0.55) 38%,
+    #fdfcfa 88%
+  );
+}
+
+.noticias-ver-mais {
+  margin-top: 1rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+#noticias-ver-mais[hidden],
+.noticias-fade[hidden] {
+  display: none !important;
 }
 
 .news-grid {
@@ -595,14 +659,6 @@ section.como .como-copy h2 {
   color: var(--green-dark);
 }
 
-.noticias-foot {
-  margin-top: 1.75rem;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  max-width: 42rem;
-  line-height: 1.5;
-}
-
 .noticias-status {
   color: var(--text-muted);
   font-size: 0.95rem;
@@ -610,17 +666,6 @@ section.como .como-copy h2 {
 }
 
 .noticias-status[hidden] {
-  display: none;
-}
-
-.noticias-atualizado {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  margin: -0.75rem 0 1.35rem;
-  line-height: 1.45;
-}
-
-.noticias-atualizado[hidden] {
   display: none;
 }
 
@@ -633,6 +678,12 @@ section.como .como-copy h2 {
 @media (max-width: 920px) {
   .news-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noticias-wrap {
+    transition: none;
   }
 }
 
@@ -690,6 +741,7 @@ footer p {
 @media (max-width: 768px) {
 
   .grid-3,
+  .grid-audiencia,
   .benefits {
     grid-template-columns: 1fr;
   }
@@ -848,7 +900,7 @@ footer p {
     <div class="hero-copy-wrap">
       <div class="hero-copy">
         <h1>Orientação prática para lavoura e rebanho, direto no WhatsApp</h1>
-        <p>Tire dúvidas, envie fotos e receba respostas claras para decisões rápidas no campo.</p>
+        <p>Tire dúvidas, envie fotos e receba respostas claras para decisões rápidas no campo — também como <strong>apoio a quem trabalha no agro</strong> (técnicos da agricultura, engenheiros agrônomos, zootecnistas, florestais, consultores, assistência técnica e afins).</p>
 
         <div class="hero-buttons">
           <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
@@ -870,7 +922,7 @@ footer p {
 <section class="bg-light">
   <div class="container">
     <h2>Para quem é</h2>
-    <div class="grid-3">
+    <div class="grid-audiencia">
       <div class="block">
         <h3>Produtor rural</h3>
         <p>Decisões rápidas no dia a dia da lavoura</p>
@@ -880,8 +932,12 @@ footer p {
         <p>Apoio prático no manejo do rebanho</p>
       </div>
       <div class="block">
+        <h3>Profissionais do campo</h3>
+        <p>Técnicos e engenheiros do agro, consultores e equipes de campo: segunda leitura, cálculos, referência e forma clara de explicar ao produtor — sem substituir sua responsabilidade técnica nem as exigências do seu conselho de classe e da legislação</p>
+      </div>
+      <div class="block">
         <h3>No campo</h3>
-        <p>Resolve dúvidas por mensagem ou foto</p>
+        <p>Resolve dúvidas por mensagem ou foto, onde a internet permitir</p>
       </div>
     </div>
   </div>
@@ -926,6 +982,7 @@ footer p {
         <p>Respostas simples e diretas</p>
         <p>Disponível a qualquer hora</p>
         <p>Ajuda na decisão no campo</p>
+        <p>Apoio a <strong>cálculos práticos</strong> (doses, áreas, conversões) com base no que você informar</p>
       </div>
       <div>
         <p>Envio de fotos para análise</p>
@@ -938,15 +995,25 @@ footer p {
 
 <section id="noticias" class="container" aria-labelledby="noticias-titulo">
   <h2 id="noticias-titulo">Notícias do agro</h2>
-  <p class="noticias-lead">Lista em cache: o arquivo é atualizado no servidor (até 10 por dia, máx. 60). Com site no Netlify, configure a URL em <code>&lt;meta name="campoai-noticias-json" content="https://…/noticias.json"&gt;</code>. A API da GNews não roda no navegador.</p>
-
-  <p id="noticias-atualizado" class="noticias-atualizado" hidden aria-live="polite"></p>
 
   <p id="noticias-status" class="noticias-status" role="status">Carregando notícias…</p>
 
-  <ul id="noticias-grid" class="news-grid" aria-live="polite" aria-busy="true"></ul>
-
-  <p class="noticias-foot">Conteúdo das matérias é de responsabilidade dos veículos. O arquivo é montado pela <a href="https://gnews.io/" target="_blank" rel="noopener noreferrer">GNews</a> via <code>scripts/fetch-gnews.mjs</code> (variáveis <code>GNEWS_MAX_ARTICLES</code>, <code>GNEWS_ARCHIVE_MAX</code>) e GitHub Actions com o secret <code>GNEWS_API_KEY</code>. Quem visita o site só lê <code>noticias.json</code>. Se o arquivo não carregar, o navegador tenta uma cópia salva anteriormente; se não houver, aparecem links fixos de apoio.</p>
+  <div class="noticias-stack">
+    <div class="noticias-wrap" id="noticias-wrap">
+      <ul id="noticias-grid" class="news-grid" aria-live="polite" aria-busy="true"></ul>
+      <div id="noticias-fade" class="noticias-fade" hidden aria-hidden="true"></div>
+    </div>
+    <button
+      type="button"
+      id="noticias-ver-mais"
+      class="noticias-ver-mais btn btn-secondary"
+      hidden
+      aria-controls="noticias-grid"
+      aria-expanded="false"
+    >
+      Ver mais
+    </button>
+  </div>
 </section>
 
 <section id="planos" class="container">
@@ -971,9 +1038,11 @@ footer p {
 
       <div class="plan plan--mensal">
         <div>
+          <span class="plan-badge">30 dias de teste grátis</span>
           <h3>Mensal</h3>
           <p class="price">R$ 29/mês</p>
           <ul>
+            <li><strong>30 dias de teste grátis</strong> ao assinar o mensal — já com análises ilimitadas e prioridade na fila; depois segue a cobrança mensal (combine no WhatsApp)</li>
             <li><strong>Análises ilimitadas</strong> — use o quanto precisar no mês</li>
             <li><strong>Prioridade na fila</strong> — atendimento mais rápido nos horários de pico</li>
             <li>Texto, fotos e áudios, com respostas detalhadas e no seu contexto</li>
@@ -981,7 +1050,7 @@ footer p {
             <li>Atendimento no WhatsApp que você já usa no dia a dia</li>
           </ul>
         </div>
-        <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Quero%20assinar%20o%20plano%20mensal%20%28R%24%2029%2Fm%C3%AAs%29." class="btn btn-primary" target="_blank" rel="noopener noreferrer">Assinar</a>
+        <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Quero%20assinar%20o%20plano%20mensal%20%28R%24%2029%2Fm%C3%AAs%29%20com%2030%20dias%20de%20teste%20gr%C3%A1tis." class="btn btn-primary" target="_blank" rel="noopener noreferrer">Assinar</a>
       </div>
 
     </div>
@@ -1024,8 +1093,23 @@ footer p {
       </details>
 
       <details>
-        <summary>Substitui visita de técnico ou agrônomo?</summary>
-        <p><strong>Não.</strong> É <strong>apoio por mensagem</strong> para dúvidas e orientação rápida. Não substitui diagnóstico presencial, receita agronômica oficial nem atendimento de emergência no campo — nesses casos procure um profissional ou serviço adequados na sua região.</p>
+        <summary>O plano Mensal tem teste grátis?</summary>
+        <p>Sim. Ao assinar o <strong>plano Mensal</strong>, você conta com <strong>30 dias de teste grátis</strong> com análises ilimitadas e prioridade na fila; após esse período entra a cobrança de <strong>R$ 29/mês</strong>, conforme combinado no WhatsApp.</p>
+      </details>
+
+      <details>
+        <summary>Ajuda com cálculos no campo?</summary>
+        <p>Sim, para <strong>cálculos do dia a dia</strong> — por exemplo estimativa de dose ou área, conversão de unidades ou raciocínio a partir dos dados que você mandar (e sempre lembrando de <strong>conferir rótulo, bula e legislação</strong>). Não substitui <strong>receituário agronômico</strong> nem decisões que exijam visita técnica ou análises laboratoriais.</p>
+      </details>
+
+      <details>
+        <summary>Profissionais do agro (técnico, engenheiro, consultor…) podem usar como apoio?</summary>
+        <p>Sim — quem atua no campo ou na consultoria (técnico da agricultura, engenheiro, zootecnista, florestal, consultor, assistência técnica…) pode usar para <strong>ganhar agilidade</strong>: checagem de raciocínio, sugestão de cálculo, lembrete de boas práticas ou linguagem mais clara para o cliente. <strong>Conselho de classe</strong>, <strong>receituário</strong>, <strong>ART</strong> e a <strong>decisão técnica final</strong> continuam sendo <strong>sua responsabilidade</strong> — o AG Assist é apoio por mensagem, não laudo nem parecer formal assinado.</p>
+      </details>
+
+      <details>
+        <summary>Substitui visita de técnico ou profissional habilitado?</summary>
+        <p><strong>Não.</strong> É <strong>apoio por mensagem</strong> para dúvidas e orientação rápida. Não substitui diagnóstico presencial, documentação oficial da sua área (receituário, laudos, projetos) nem emergência no campo — nesses casos procure um profissional ou serviço adequados na sua região.</p>
       </details>
 
       <details>
@@ -1092,8 +1176,14 @@ footer p {
 (function () {
   var grid = document.getElementById("noticias-grid");
   var statusEl = document.getElementById("noticias-status");
-  var atualizadoEl = document.getElementById("noticias-atualizado");
+  var wrapEl = document.getElementById("noticias-wrap");
+  var fadeEl = document.getElementById("noticias-fade");
+  var verMaisEl = document.getElementById("noticias-ver-mais");
   if (!grid) return;
+
+  var NOTICIAS_PREVIEW = 3;
+  var noticiasExpanded = false;
+  var collapseListenersBound = false;
 
   var fallbackItems = [
     {
@@ -1158,12 +1248,25 @@ footer p {
     }
   }
 
+  function isLocalDevHost() {
+    try {
+      var h = String(location.hostname || "").toLowerCase();
+      if (h === "localhost" || h === "127.0.0.1" || h === "[::1]" || h.endsWith(".localhost")) return true;
+      if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+      if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+      if (/^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function noticiasJsonUrl() {
     var w = typeof window.__CAMPOAI_NOTICIAS_JSON__ === "string" ? window.__CAMPOAI_NOTICIAS_JSON__.trim() : "";
     if (w && /^https?:\/\//i.test(w)) return w;
     var meta = document.querySelector('meta[name="campoai-noticias-json"]');
     var c = meta && meta.getAttribute("content") ? meta.getAttribute("content").trim() : "";
-    if (c && /^https?:\/\//i.test(c)) return c;
+    if (c && /^https?:\/\//i.test(c) && !isLocalDevHost()) return c;
     return "noticias.json";
   }
 
@@ -1201,23 +1304,73 @@ footer p {
       });
   }
 
-  function showCacheStamp(iso) {
-    if (!atualizadoEl || !iso) return;
-    try {
-      var d = new Date(iso);
-      if (isNaN(d.getTime())) return;
-      atualizadoEl.textContent =
-        "Última atualização do cache: " +
-        d.toLocaleString("pt-BR", { dateStyle: "medium", timeStyle: "short" }) +
-        " (horário local do seu aparelho).";
-      atualizadoEl.hidden = false;
-    } catch (e) {}
+  function bindCollapseLayout() {
+    if (collapseListenersBound || !wrapEl) return;
+    collapseListenersBound = true;
+
+    var remeasureTimer = null;
+    function scheduleRemeasure() {
+      if (noticiasExpanded) return;
+      clearTimeout(remeasureTimer);
+      remeasureTimer = setTimeout(function () {
+        updateCollapsedMaxHeight();
+      }, 80);
+    }
+
+    window.addEventListener("resize", scheduleRemeasure);
+    grid.addEventListener("load", scheduleRemeasure, true);
+  }
+
+  function updateCollapsedMaxHeight() {
+    if (!wrapEl || noticiasExpanded || !wrapEl.classList.contains("noticias-wrap--collapsed")) return;
+    var cards = grid.querySelectorAll(".news-card");
+    if (cards.length <= NOTICIAS_PREVIEW) return;
+    var anchor = cards[NOTICIAS_PREVIEW - 1];
+    var wrapTop = wrapEl.getBoundingClientRect().top;
+    var bottom = anchor.getBoundingClientRect().bottom;
+    var peekPx = 72;
+    wrapEl.style.maxHeight = Math.max(180, Math.ceil(bottom - wrapTop + peekPx)) + "px";
+  }
+
+  function setupNoticiasCollapse() {
+    if (!wrapEl || !fadeEl || !verMaisEl) return;
+
+    noticiasExpanded = false;
+    verMaisEl.onclick = null;
+    wrapEl.classList.remove("noticias-wrap--collapsed");
+    wrapEl.style.maxHeight = "";
+    fadeEl.hidden = true;
+    verMaisEl.hidden = true;
+
+    var cardCount = grid.querySelectorAll(".news-card").length;
+    if (cardCount <= NOTICIAS_PREVIEW) return;
+
+    wrapEl.classList.add("noticias-wrap--collapsed");
+    fadeEl.hidden = false;
+    verMaisEl.hidden = false;
+    verMaisEl.setAttribute("aria-expanded", "false");
+    bindCollapseLayout();
+
+    requestAnimationFrame(function () {
+      requestAnimationFrame(updateCollapsedMaxHeight);
+    });
+    setTimeout(updateCollapsedMaxHeight, 400);
+
+    verMaisEl.onclick = function () {
+      noticiasExpanded = true;
+      verMaisEl.setAttribute("aria-expanded", "true");
+      wrapEl.classList.remove("noticias-wrap--collapsed");
+      wrapEl.style.maxHeight = "";
+      fadeEl.hidden = true;
+      verMaisEl.hidden = true;
+    };
   }
 
   function render(items) {
     if (!items.length) {
       grid.innerHTML = '<li class="news-empty">Nenhuma notícia cadastrada no momento.</li>';
       grid.setAttribute("aria-busy", "false");
+      setupNoticiasCollapse();
       return;
     }
 
@@ -1246,6 +1399,7 @@ footer p {
 
     grid.innerHTML = html;
     grid.setAttribute("aria-busy", "false");
+    setupNoticiasCollapse();
   }
 
   function doneLoading() {
@@ -1254,7 +1408,6 @@ footer p {
 
   loadFromJson().then(function (res) {
     render(res.items);
-    showCacheStamp(res.fetchedAt);
     doneLoading();
   });
 })();
