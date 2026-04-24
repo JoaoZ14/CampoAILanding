@@ -529,6 +529,56 @@ section.como .como-copy h2 {
   margin-bottom: 0.75rem;
 }
 
+.plan-note {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: rgba(42, 56, 42, 0.88);
+  margin: 0.75rem 0 0;
+}
+
+.plans-footnote {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1rem 1.25rem 1.05rem;
+  background: linear-gradient(180deg, rgba(246, 243, 236, 0.65) 0%, rgba(253, 252, 250, 0.98) 100%);
+  border-top: 1px solid rgba(42, 56, 42, 0.07);
+}
+
+.plans-footnote__icon {
+  flex-shrink: 0;
+  margin-top: 0.12rem;
+  color: var(--field-dark);
+  opacity: 0.92;
+}
+
+.plans-footnote__icon svg {
+  display: block;
+}
+
+.plans-footnote__text {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  letter-spacing: 0.01em;
+}
+
+.plans-footnote__link {
+  color: var(--green-dark);
+  font-weight: 600;
+  text-decoration: none;
+  text-underline-offset: 0.18em;
+  border-bottom: 1px solid rgba(169, 116, 64, 0.45);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.plans-footnote__link:hover {
+  color: var(--field-dark);
+  border-bottom-color: var(--field);
+}
+
 /* NOTÍCIAS */
 .noticias-stack {
   display: flex;
@@ -1025,10 +1075,10 @@ footer p {
       <div class="plan">
         <div>
           <h3>Plano Pessoal</h3>
-          <p class="price">A partir de R$ 49/mês</p>
+          <p class="price">A partir de R$ 29/mês</p>
           <ul>
             <li>Plano para pessoa física</li>
-            <li>Confirmação por WhatsApp (OTP)</li>
+            <li>Confirmação por SMS (OTP)</li>
             <li>Cadastro com CPF</li>
           </ul>
         </div>
@@ -1040,10 +1090,14 @@ footer p {
       <div class="plan plan--mensal">
         <div>
           <h3>Plano Empresa</h3>
-          <p class="price">A partir de R$ 119/mês</p>
+          <p class="price">A partir de R$ 199/mês</p>
+          <p class="plan-note">
+            Os planos Empresa são para <strong>a partir de 5 números</strong> no WhatsApp (equipe).
+           
+          </p>
           <ul>
             <li>Plano para pessoa jurídica</li>
-            <li>Confirmação por WhatsApp (OTP)</li>
+            <li>Confirmação por SMS (OTP)</li>
             <li>Cadastro com CNPJ</li>
           </ul>
         </div>
@@ -1051,7 +1105,19 @@ footer p {
       </div>
 
     </div>
-    <p>Valores e limites exatos estão na página de planos.</p>
+    <div class="plans-footnote" role="note">
+      <span class="plans-footnote__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 16v-4" />
+          <path d="M12 8h.01" />
+        </svg>
+      </span>
+      <p class="plans-footnote__text">
+        Valores e limites exatos estão na
+        <a href="https://campoai.onrender.com/planos" class="plans-footnote__link" target="_blank" rel="noopener noreferrer">página de planos</a>.
+      </p>
+    </div>
   </div>
 </section>
 
