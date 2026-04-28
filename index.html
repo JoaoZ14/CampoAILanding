@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#2a382a">
-<meta name="description" content="Orientação prática para lavoura e rebanho pelo WhatsApp. Tire dúvidas, envie fotos e receba respostas rápidas no campo. Planos gratuito e mensal (mensal com 30 dias de teste).">
+<meta name="description" content="Orientação prática para lavoura e rebanho pelo WhatsApp. Tire dúvidas, envie fotos e receba respostas rápidas no campo. Planos gratuito e mensal.">
 
 <!-- Netlify + notícias na VPS: URL HTTPS do noticias.json. Em localhost / IP da rede local o script ignora isto e pede noticias.json na mesma origem (a VPS só libera CORS para o Netlify). Vazio = noticias.json no mesmo host. -->
 <meta name="campoai-noticias-json" content="https://agassist.duckdns.org/noticias.json">
@@ -81,6 +81,18 @@ body {
 
 .skip-link:focus-visible {
   top: 0.75rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 body.menu-open {
@@ -296,9 +308,14 @@ section h2 {
   font-size: clamp(2rem, 4.2vw, 3rem);
   line-height: 1.12;
   color: var(--green-dark);
-  max-width: 640px;
+  max-width: 34rem;
   letter-spacing: -0.03em;
   font-weight: 700;
+  text-wrap: balance;
+}
+
+.hero-h1-break {
+  display: block;
 }
 
 .hero p {
@@ -313,6 +330,12 @@ section h2 {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.hero-trial{
+  margin-top: 0.85rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
 }
 
 /* PARA QUEM */
@@ -489,12 +512,36 @@ section.como .como-copy h2 {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 1.35rem;
 }
 
 .price {
-  font-size: 36px;
-  font-weight: 700;
+  margin: 0.35rem 0 0;
   color: var(--green-dark);
+}
+
+.price-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  margin-bottom: 0.15rem;
+}
+
+.price-value {
+  display: inline-block;
+  font-size: clamp(1.85rem, 4.5vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.price-unit {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0;
 }
 
 .plan ul {
@@ -756,15 +803,48 @@ section.como .como-copy h2 {
   font-weight: 600;
   cursor: pointer;
   color: var(--green-dark);
-  padding: 0.65rem 0 0.5rem;
+  padding: 0.65rem 2rem 0.5rem 0;
   line-height: 1.45;
   min-height: 44px;
   display: flex;
   align-items: center;
+  list-style: none;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .faq summary::-webkit-details-marker {
-  color: var(--green-dark);
+  display: none;
+}
+
+.faq summary::marker {
+  content: "";
+}
+
+.faq summary::after {
+  content: "";
+  position: absolute;
+  right: 0.15rem;
+  top: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-top: -0.2rem;
+  border-right: 2px solid var(--field-dark);
+  border-bottom: 2px solid var(--field-dark);
+  transform: rotate(45deg);
+  opacity: 0.85;
+  transition: transform 0.2s ease, margin-top 0.2s ease;
+}
+
+.faq details[open] summary::after {
+  margin-top: 0.1rem;
+  transform: rotate(-135deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq summary::after {
+    transition: none;
+  }
 }
 
 .faq details p {
@@ -782,9 +862,58 @@ footer {
   border-top: 3px solid var(--field-line);
 }
 
-footer p {
-  font-size: 0.9rem;
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.footer-col h3 {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  color: var(--green-dark);
+}
+
+.footer-col p,
+.footer-col li,
+.footer-copy {
+  font-size: 0.92rem;
   color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.footer-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-col a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.footer-col a:hover,
+.footer-col a:focus-visible {
+  color: var(--green-dark);
+  text-decoration: underline;
+}
+
+.footer-divider {
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--field-line) 70%, #ffffff 30%);
+  margin: 1.5rem 0 1rem;
+}
+
+.footer-copy {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-copy a {
+  color: var(--text);
 }
 
 /* RESPONSIVO */
@@ -798,6 +927,10 @@ footer p {
 
   .plans {
     grid-template-columns: 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
   .divider {
@@ -909,6 +1042,14 @@ footer p {
   .news-grid {
     grid-template-columns: 1fr;
   }
+
+}
+
+@media (max-width: 560px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
 }
 </style>
 </head>
@@ -937,7 +1078,7 @@ footer p {
       <a href="#noticias">Notícias</a>
       <a href="#planos">Planos</a>
       <a href="#faq">FAQ</a>
-      <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp — abre em nova aba">WhatsApp</a>
     </nav>
   </div>
 </header>
@@ -949,13 +1090,17 @@ footer p {
   <div class="hero-shell">
     <div class="hero-copy-wrap">
       <div class="hero-copy">
-        <h1>Orientação prática para lavoura e rebanho, direto no WhatsApp</h1>
+        <h1>
+          Orientação prática para quem vive a lida no campo
+          <span class="hero-h1-break">Direto no WhatsApp</span>
+        </h1>
         <p>Tire dúvidas, envie fotos e receba respostas claras para decisões rápidas no campo — também como <strong>apoio a quem trabalha no agro</strong> (técnicos da agricultura, engenheiros agrônomos, zootecnistas, florestais, consultores, assistência técnica e afins).</p>
 
         <div class="hero-buttons">
-          <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
+          <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="Começar grátis no WhatsApp — abre em nova aba">Começar grátis</a>
           <a href="#planos" class="btn btn-secondary">Ver planos</a>
         </div>
+        <p class="hero-trial">Experimente grátis e veja na prática.</p>
       </div>
     </div>
 
@@ -1016,7 +1161,7 @@ footer p {
           </div>
           <div class="step">
             <div class="step-number">3</div>
-            <p>Receba orientação em poucos minutos</p>
+            <p>Receba orientação em poucos segundos</p>
           </div>
         </div>
       </div>
@@ -1066,8 +1211,8 @@ footer p {
   </div>
 </section>
 
-<section id="planos" class="container">
-  <h2>Planos</h2>
+<section id="planos" class="container" aria-labelledby="planos-titulo">
+  <h2 id="planos-titulo">Planos</h2>
 
   <div class="plans-wrapper">
     <div class="plans">
@@ -1075,14 +1220,17 @@ footer p {
       <div class="plan">
         <div>
           <h3>Plano Pessoal</h3>
-          <p class="price">A partir de R$ 29/mês</p>
+          <p class="price">
+            <span class="price-label">A partir de</span>
+            <span class="price-value">R$&nbsp;29<span class="price-unit">/mês</span></span>
+          </p>
           <ul>
             <li>Plano para pessoa física</li>
             <li>Confirmação por SMS (OTP)</li>
             <li>Cadastro com CPF</li>
           </ul>
         </div>
-        <a href="https://campoai.onrender.com/planos" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">Ver planos e assinar</a>
+        <a href="https://campoai.onrender.com/planos" class="btn btn-secondary" target="_blank" rel="noopener noreferrer" aria-label="Ver planos e assinar — Plano Pessoal (abre em nova aba)">Ver planos e assinar</a>
       </div>
 
       <div class="divider"></div>
@@ -1090,10 +1238,12 @@ footer p {
       <div class="plan plan--mensal">
         <div>
           <h3>Plano Empresa</h3>
-          <p class="price">A partir de R$ 199/mês</p>
+          <p class="price">
+            <span class="price-label">A partir de</span>
+            <span class="price-value">R$&nbsp;199<span class="price-unit">/mês</span></span>
+          </p>
           <p class="plan-note">
             Os planos Empresa são para <strong>a partir de 5 números</strong> no WhatsApp (equipe).
-           
           </p>
           <ul>
             <li>Plano para pessoa jurídica</li>
@@ -1101,7 +1251,7 @@ footer p {
             <li>Cadastro com CNPJ</li>
           </ul>
         </div>
-        <a href="https://campoai.onrender.com/planos" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Ver planos e assinar</a>
+        <a href="https://campoai.onrender.com/planos" class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="Ver planos e assinar — Plano Empresa (abre em nova aba)">Ver planos e assinar</a>
       </div>
 
     </div>
@@ -1115,7 +1265,7 @@ footer p {
       </span>
       <p class="plans-footnote__text">
         Valores e limites exatos estão na
-        <a href="https://campoai.onrender.com/planos" class="plans-footnote__link" target="_blank" rel="noopener noreferrer">página de planos</a>.
+        <a href="https://campoai.onrender.com/planos" class="plans-footnote__link" target="_blank" rel="noopener noreferrer" aria-label="Página de planos (abre em nova aba)">página de planos</a>.
       </p>
     </div>
   </div>
@@ -1148,17 +1298,12 @@ footer p {
 
       <details>
         <summary>Quanto tempo leva para responder?</summary>
-        <p>O tempo varia conforme fila e complexidade da pergunta. No <strong>plano Mensal</strong> as respostas têm <strong>prioridade</strong> em relação ao gratuito quando houver muita demanda.</p>
+        <p>Na prática as respostas chegam em <strong>poucos segundos</strong>. Só pode levar um pouco mais se a pergunta for muito extensa ou vier com <strong>muitas fotos ou áudios</strong> para analisar. <strong>Não existe prioridade de fila</strong> entre gratuito e mensal: o atendimento é o mesmo em velocidade.</p>
       </details>
 
       <details>
         <summary>O que está incluso no gratuito e no mensal?</summary>
-        <p>Os <strong>mesmos tipos</strong> de atendimento (texto, fotos, áudios e nível de detalhe nas respostas). A diferença é o <strong>limite de análises por mês</strong> no gratuito e o <strong>uso ilimitado + fila prioritária</strong> no mensal, conforme descrito na seção Planos.</p>
-      </details>
-
-      <details>
-        <summary>O plano Mensal tem teste grátis?</summary>
-        <p>Sim. Ao assinar o <strong>plano Mensal</strong>, você conta com <strong>30 dias de teste grátis</strong> com análises ilimitadas e prioridade na fila; após esse período entra a cobrança de <strong>R$ 49/mês</strong>, conforme combinado no WhatsApp.</p>
+        <p>Os <strong>mesmos tipos</strong> de atendimento (texto, fotos, áudios e nível de detalhe nas respostas). O que muda de um plano para o outro (valor e condições de uso) você vê na <strong>seção Planos</strong> e na hora de <strong>assinar</strong>, na página de planos.</p>
       </details>
 
       <details>
@@ -1187,7 +1332,61 @@ footer p {
 
 <footer>
   <div class="container">
-    <p>© AG Assist</p>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h3>AG Assist</h3>
+        <p>Razão social: 66.412.901 JOAO GUILHERME CANUTO POSSIDONIO</p>
+        <p>CNPJ: 66.412.901/0001-07</p>
+        <p>Localização: Resende/R</p>
+      </div>
+
+      <div class="footer-col">
+        <h3>Contato</h3>
+        <ul>
+          <li>
+            E-mail:
+            <a href="mailto:joaopossidonio.dev@gmail.com">joaopossidonio.dev@gmail.com</a>
+          </li>
+          <li>
+            Telefone/WhatsApp:
+            <a href="https://wa.me/5524988685043" target="_blank" rel="noopener noreferrer">(24) 98868-5043 (Joao Guilherme)</a>
+          </li>
+          <li>
+            Instagram:
+            <a href="https://instagram.com/agassist.ia" target="_blank" rel="noopener noreferrer">@agassist.ia</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h3>Links úteis</h3>
+        <ul>
+          <li><a href="#como">Como funciona</a></li>
+          <li><a href="#noticias">Notícias</a></li>
+          <li><a href="#planos">Planos</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h3>Legal</h3>
+        <ul>
+          <li>
+            <a href="https://campoai.onrender.com/legal/termos-de-uso" target="_blank" rel="noopener noreferrer">Termos de Uso</a>
+          </li>
+          <li>
+            <a href="https://campoai.onrender.com/legal/politica-de-privacidade" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <hr class="footer-divider" />
+
+    <div class="footer-copy">
+      <p>© 2026 AG Assist. Todos os direitos reservados.</p>
+      <p>Desenvolvido por EcoSystems.</p>
+    </div>
   </div>
 </footer>
 
@@ -1427,6 +1626,11 @@ function toggleMenu() {
       wrapEl.style.maxHeight = "";
       fadeEl.hidden = true;
       verMaisEl.hidden = true;
+      try {
+        var fourthCard = grid.querySelectorAll(".news-card")[NOTICIAS_PREVIEW];
+        var fourthLink = fourthCard && fourthCard.querySelector(".news-card__link");
+        if (fourthLink && typeof fourthLink.focus === "function") fourthLink.focus({ preventScroll: true });
+      } catch (e) {}
     };
   }
 
@@ -1456,7 +1660,8 @@ function toggleMenu() {
         '<div class="news-card__body">' +
         '<p class="news-card__meta">' + meta + "</p>" +
         '<h3 class="news-card__title">' + title + "</h3>" +
-        '<span class="news-card__cta">Abrir link</span>' +
+        '<span class="sr-only">Abre em nova aba.</span>' +
+        '<span class="news-card__cta" aria-hidden="true">Ver na fonte</span>' +
         "</div></a></li>"
       );
     }).join("");
