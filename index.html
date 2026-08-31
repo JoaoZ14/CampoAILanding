@@ -6,8 +6,10 @@
 <meta name="theme-color" content="#2a382a">
 <meta name="description" content="Orientação prática para lavoura e rebanho pelo WhatsApp. Tire dúvidas, envie fotos e receba respostas rápidas no campo. Planos gratuito e mensal.">
 
-<!-- Netlify + notícias na VPS: URL HTTPS do noticias.json. Em localhost / IP da rede local o script ignora isto e pede noticias.json na mesma origem (a VPS só libera CORS para o Netlify). Vazio = noticias.json no mesmo host. -->
-<meta name="campoai-noticias-json" content="https://agassist.duckdns.org/noticias.json">
+<!-- Notícias e cotações: JSON no mesmo host (Netlify). Em localhost o script usa noticias.json/cotacoes.json na mesma origem. -->
+<meta name="campoai-noticias-json" content="noticias.json">
+<!-- Cotações: por padrão, cotacoes.json no mesmo host -->
+<meta name="campoai-cotacoes-json" content="cotacoes.json">
 
 <title>AG Assist</title>
 
@@ -649,6 +651,108 @@ section.como .como-copy h2 {
   gap: 0;
 }
 
+.cotacoes-controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 0 1.1rem;
+}
+
+.cotacoes-select {
+  min-height: 44px;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(42, 56, 42, 0.12);
+  background: #fff;
+  color: var(--green-dark);
+  font: inherit;
+  box-shadow: var(--shadow-sm);
+}
+
+.cotacoes-updated {
+  margin-top: 0.85rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.cotacoes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2.2vw, 1.5rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.quote-card {
+  border: 1px solid rgba(42, 56, 42, 0.1);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.quote-card:hover {
+  box-shadow: 0 10px 32px rgba(42, 56, 42, 0.1);
+  border-color: var(--field-line);
+}
+
+.quote-card__body {
+  padding: 1rem 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.quote-card__title {
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1.25;
+  color: var(--green-dark);
+}
+
+.quote-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  align-items: baseline;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.quote-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--field-line);
+  background: var(--field-soft);
+  color: var(--field-dark);
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.quote-card__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.quote-card__price strong {
+  font-size: 1.25rem;
+  line-height: 1.1;
+  color: var(--green-dark);
+  letter-spacing: -0.02em;
+}
+
+.quote-card__unit {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
 .noticias-wrap {
   position: relative;
   width: 100%;
@@ -789,6 +893,9 @@ section.como .como-copy h2 {
 
 @media (max-width: 920px) {
   .news-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cotacoes-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1090,6 +1197,7 @@ footer {
 
     <nav id="menu" aria-label="Principal">
       <a href="#como">Como funciona</a>
+      <a href="#cotacoes">Cotações</a>
       <a href="#noticias">Notícias</a>
       <a href="#planos">Planos</a>
       <a href="#faq">FAQ</a>
@@ -1203,6 +1311,23 @@ footer {
   </div>
 </section>
 
+<section id="cotacoes" class="container" aria-labelledby="cotacoes-titulo">
+  <h2 id="cotacoes-titulo">Cotações</h2>
+
+  <p id="cotacoes-status" class="noticias-status" role="status">Carregando cotações…</p>
+
+  <div class="cotacoes-controls" aria-label="Filtros de cotações">
+    <label class="sr-only" for="cotacoes-commodity">Produto</label>
+    <select id="cotacoes-commodity" class="cotacoes-select"></select>
+
+    <label class="sr-only" for="cotacoes-uf">UF</label>
+    <select id="cotacoes-uf" class="cotacoes-select"></select>
+  </div>
+
+  <ul id="cotacoes-grid" class="cotacoes-grid" aria-live="polite" aria-busy="true"></ul>
+  <p id="cotacoes-updated" class="cotacoes-updated" hidden></p>
+</section>
+
 <section id="noticias" class="container" aria-labelledby="noticias-titulo">
   <h2 id="noticias-titulo">Notícias do agro</h2>
 
@@ -1245,7 +1370,7 @@ footer {
             <li>Cadastro com CPF</li>
           </ul>
         </div>
-        <a href="https://campoai.onrender.com/planos" class="btn btn-secondary" target="_blank" rel="noopener noreferrer" aria-label="Ver planos e assinar — Plano Pessoal (abre em nova aba)">Ver planos e assinar</a>
+        <a href="https://agassist.duckdns.org/planos" class="btn btn-secondary" target="_blank" rel="noopener noreferrer" aria-label="Ver planos e assinar — Plano Pessoal (abre em nova aba)">Ver planos e assinar</a>
       </div>
 
       <div class="divider"></div>
@@ -1266,7 +1391,7 @@ footer {
             <li>Cadastro com CNPJ</li>
           </ul>
         </div>
-        <a href="https://campoai.onrender.com/planos" class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="Ver planos e assinar — Plano Empresa (abre em nova aba)">Ver planos e assinar</a>
+        <a href="https://agassist.duckdns.org/planos" class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="Ver planos e assinar — Plano Empresa (abre em nova aba)">Ver planos e assinar</a>
       </div>
 
     </div>
@@ -1280,7 +1405,7 @@ footer {
       </span>
       <p class="plans-footnote__text">
         Valores e limites exatos estão na
-        <a href="https://campoai.onrender.com/planos" class="plans-footnote__link" target="_blank" rel="noopener noreferrer" aria-label="Página de planos (abre em nova aba)">página de planos</a>.
+        <a href="https://agassist.duckdns.org/planos" class="plans-footnote__link" target="_blank" rel="noopener noreferrer" aria-label="Página de planos (abre em nova aba)">página de planos</a>.
       </p>
     </div>
   </div>
@@ -1377,6 +1502,7 @@ footer {
         <h3>Links úteis</h3>
         <ul>
           <li><a href="#como">Como funciona</a></li>
+          <li><a href="#cotacoes">Cotações</a></li>
           <li><a href="#noticias">Notícias</a></li>
           <li><a href="#planos">Planos</a></li>
           <li><a href="#faq">FAQ</a></li>
@@ -1387,10 +1513,10 @@ footer {
         <h3>Legal</h3>
         <ul>
           <li>
-            <a href="https://campoai.onrender.com/legal/termos-de-uso" target="_blank" rel="noopener noreferrer">Termos de Uso</a>
+            <a href="https://agassist.duckdns.org/legal/termos-de-uso" target="_blank" rel="noopener noreferrer">Termos de Uso</a>
           </li>
           <li>
-            <a href="https://campoai.onrender.com/legal/politica-de-privacidade" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>
+            <a href="https://agassist.duckdns.org/legal/politica-de-privacidade" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>
           </li>
         </ul>
       </div>
@@ -1446,6 +1572,203 @@ function toggleMenu() {
 
   window.addEventListener("resize", function () {
     if (!window.matchMedia("(max-width: 768px)").matches) closeMenu();
+  });
+})();
+</script>
+
+<script>
+(function () {
+  var grid = document.getElementById("cotacoes-grid");
+  var statusEl = document.getElementById("cotacoes-status");
+  var updatedEl = document.getElementById("cotacoes-updated");
+  var commoditySel = document.getElementById("cotacoes-commodity");
+  var ufSel = document.getElementById("cotacoes-uf");
+  if (!grid || !commoditySel || !ufSel) return;
+
+  var fallbackItems = [
+    { commodity: "Soja", uf: "PR", price: 0, currency: "BRL", unit: "sc 60kg", date: "", source: "Agrobr" },
+    { commodity: "Milho", uf: "MT", price: 0, currency: "BRL", unit: "sc 60kg", date: "", source: "Agrobr" },
+    { commodity: "Boi gordo", uf: "SP", price: 0, currency: "BRL", unit: "@ 15kg", date: "", source: "Agrobr" },
+    { commodity: "Café arábica", uf: "MG", price: 0, currency: "BRL", unit: "sc 60kg", date: "", source: "Agrobr" },
+    { commodity: "Algodão", uf: "BA", price: 0, currency: "BRL", unit: "lp", date: "", source: "Agrobr" },
+    { commodity: "Trigo", uf: "RS", price: 0, currency: "BRL", unit: "sc 60kg", date: "", source: "Agrobr" }
+  ];
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function formatMoney(value, currency) {
+    var n = Number(value);
+    if (!isFinite(n)) return "—";
+    try {
+      return n.toLocaleString("pt-BR", { style: "currency", currency: currency || "BRL" });
+    } catch (e) {
+      return "R$ " + n.toFixed(2).replace(".", ",");
+    }
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "";
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function cotacoesJsonUrl() {
+    var meta = document.querySelector('meta[name="campoai-cotacoes-json"]');
+    var c = meta && meta.getAttribute("content") ? meta.getAttribute("content").trim() : "";
+    return c || "cotacoes.json";
+  }
+
+  var COTACOES_LS = "campoai-cotacoes-cache::" + cotacoesJsonUrl();
+
+  function loadFromJson() {
+    return fetch(cotacoesJsonUrl(), { cache: "no-store", credentials: "omit" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("cotacoes");
+        return r.json();
+      })
+      .then(function (data) {
+        try {
+          if (data && Array.isArray(data.items) && data.items.length) {
+            localStorage.setItem(COTACOES_LS, JSON.stringify(data));
+          }
+        } catch (e) {}
+        var items = data && Array.isArray(data.items) ? data.items : [];
+        return { items: items.length ? items : fallbackItems, fetchedAt: data && data.fetchedAt ? data.fetchedAt : null };
+      })
+      .catch(function () {
+        try {
+          var raw = localStorage.getItem(COTACOES_LS);
+          if (raw) {
+            var data = JSON.parse(raw);
+            var items = data && Array.isArray(data.items) ? data.items : [];
+            if (items.length) return { items: items, fetchedAt: data.fetchedAt || null };
+          }
+        } catch (e) {}
+        return { items: fallbackItems, fetchedAt: null };
+      });
+  }
+
+  function uniqueSorted(arr) {
+    var seen = Object.create(null);
+    var out = [];
+    arr.forEach(function (v) {
+      var s = String(v || "").trim();
+      if (!s) return;
+      if (seen[s]) return;
+      seen[s] = true;
+      out.push(s);
+    });
+    out.sort(function (a, b) { return a.localeCompare(b, "pt-BR"); });
+    return out;
+  }
+
+  function setSelectOptions(select, options) {
+    select.innerHTML = options.map(function (o) {
+      return '<option value="' + escapeHtml(o.value) + '">' + escapeHtml(o.label) + "</option>";
+    }).join("");
+  }
+
+  function buildFilters(items) {
+    var commodities = uniqueSorted(items.map(function (i) { return i.commodity; }));
+    var ufs = uniqueSorted(items.map(function (i) { return i.uf; }));
+
+    setSelectOptions(commoditySel, [{ value: "ALL", label: "Produto: todos" }].concat(
+      commodities.map(function (c) { return { value: c, label: c }; })
+    ));
+    setSelectOptions(ufSel, [{ value: "ALL", label: "UF: todas" }].concat(
+      ufs.map(function (u) { return { value: u, label: u }; })
+    ));
+  }
+
+  function applyFilters(items) {
+    var c = commoditySel.value || "ALL";
+    var u = ufSel.value || "ALL";
+    return items.filter(function (it) {
+      if (c !== "ALL" && String(it.commodity || "") !== c) return false;
+      if (u !== "ALL" && String(it.uf || "") !== u) return false;
+      return true;
+    });
+  }
+
+  function render(items) {
+    if (!items.length) {
+      grid.innerHTML = '<li class="news-empty">Nenhuma cotação disponível no momento.</li>';
+      grid.setAttribute("aria-busy", "false");
+      return;
+    }
+
+    grid.innerHTML = items.map(function (item) {
+      var commodity = escapeHtml(item.commodity || "Produto");
+      var uf = escapeHtml(item.uf || "");
+      var source = escapeHtml(item.source || "Fonte");
+      var unit = escapeHtml(item.unit || "");
+      var dateStr = formatDate(item.date);
+      var price = formatMoney(item.price, item.currency || "BRL");
+
+      var pills = (uf ? '<span class="quote-pill" aria-label="UF">' + uf + "</span>" : "") +
+                  (source ? '<span class="quote-pill" aria-label="Fonte">' + source + "</span>" : "");
+
+      var meta = [];
+      if (dateStr) meta.push("Data: " + escapeHtml(dateStr));
+      if (unit) meta.push("Unidade: " + unit);
+
+      return (
+        '<li class="quote-card">' +
+          '<div class="quote-card__body">' +
+            '<h3 class="quote-card__title">' + commodity + "</h3>" +
+            '<div class="quote-card__meta">' + pills + "</div>" +
+            '<div class="quote-card__price"><strong>' + escapeHtml(price) + '</strong>' +
+              (unit ? '<span class="quote-card__unit">' + unit + "</span>" : "") +
+            "</div>" +
+            (meta.length ? '<p class="quote-card__meta">' + meta.join(" · ") + "</p>" : "") +
+          "</div>" +
+        "</li>"
+      );
+    }).join("");
+
+    grid.setAttribute("aria-busy", "false");
+  }
+
+  function doneLoading() {
+    if (statusEl) statusEl.hidden = true;
+  }
+
+  var allItems = [];
+  loadFromJson().then(function (res) {
+    allItems = Array.isArray(res.items) ? res.items : [];
+
+    buildFilters(allItems);
+    render(applyFilters(allItems));
+
+    commoditySel.addEventListener("change", function () {
+      render(applyFilters(allItems));
+    });
+    ufSel.addEventListener("change", function () {
+      render(applyFilters(allItems));
+    });
+
+    if (updatedEl) {
+      if (res.fetchedAt) {
+        var updated = formatDate(res.fetchedAt);
+        updatedEl.textContent = updated ? ("Atualizado em " + updated + ".") : "Atualizado recentemente.";
+        updatedEl.hidden = false;
+      } else {
+        updatedEl.hidden = true;
+      }
+    }
+
+    doneLoading();
   });
 })();
 </script>

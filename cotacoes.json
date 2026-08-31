@@ -1,0 +1,61 @@
+{
+  "fetchedAt": "2026-08-30T23:42:55.512673Z",
+  "items": [
+    {
+      "commodity": "soja",
+      "uf": "BR",
+      "price": 127.84,
+      "currency": "BRL",
+      "unit": "BRL/sc60kg",
+      "date": "2026-04-09",
+      "source": "datasets.preco_diario/cepea"
+    },
+    {
+      "commodity": "milho",
+      "uf": "BR",
+      "price": 69.59,
+      "currency": "BRL",
+      "unit": "BRL/sc60kg",
+      "date": "2026-04-09",
+      "source": "datasets.preco_diario/cepea"
+    },
+    {
+      "commodity": "boi",
+      "uf": "BR",
+      "price": 365.45,
+      "currency": "BRL",
+      "unit": "BRL/@",
+      "date": "2026-04-09",
+      "source": "datasets.preco_diario/cepea"
+    },
+    {
+      "commodity": "cafe",
+      "uf": "BR",
+      "price": 1821.38,
+      "currency": "BRL",
+      "unit": "BRL/sc60kg",
+      "date": "2026-04-09",
+      "source": "datasets.preco_diario/cepea"
+    },
+    {
+      "commodity": "algodao",
+      "uf": "BR",
+      "price": 390.81,
+      "currency": "BRL",
+      "unit": "BRL/@",
+      "date": "2026-04-09",
+      "source": "datasets.preco_diario/cepea"
+    },
+    {
+      "commodity": "trigo",
+      "uf": "BR",
+      "price": 1292.2,
+      "currency": "BRL",
+      "unit": "BRL/sc60kg",
+      "date": "2026-04-09",
+      "source": "datasets.preco_diario/cepea"
+    }
+  ],
+  "source": "agrobr",
+  "errors": []
+}

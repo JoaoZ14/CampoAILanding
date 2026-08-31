@@ -4,11 +4,13 @@
  * - Junta com o que já está em noticias.json, deduplica por URL.
  * - Ordena por data de publicação (mais recentes primeiro).
  * - Mantém no máximo GNEWS_ARCHIVE_MAX itens (padrão 60), removendo as mais antigas.
+ * - Filtra matérias políticas e prioriza termos do agro (ver agro-news-filter.mjs).
  *
  * Uso local (PowerShell):
  *   $env:GNEWS_API_KEY="sua_chave"; node scripts/fetch-gnews.mjs
  *
- * Variáveis opcionais: GNEWS_MAX_ARTICLES, GNEWS_PAGE_SIZE, GNEWS_ARCHIVE_MAX
+ * Variáveis opcionais: GNEWS_MAX_ARTICLES, GNEWS_PAGE_SIZE, GNEWS_ARCHIVE_MAX,
+ *   GNEWS_QUERY, GNEWS_EXCLUDE_TERMS, GNEWS_FILTER_AGRO
  *
  * GitHub Actions: secret GNEWS_API_KEY + workflow update-noticias.yml
  */
@@ -16,6 +18,12 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import {
+  filterAgroNews,
+  isAgroFilterEnabled,
+  resolveExtraBlocklist,
+  resolveGNewsQuery
+} from "./agro-news-filter.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
@@ -44,13 +52,17 @@ const PAGE_SIZE = Math.min(
   Math.max(1, Number.parseInt(process.env.GNEWS_PAGE_SIZE || "10", 10) || 10)
 );
 
-const query = encodeURIComponent("agronegócio OR agricultura OR pecuária");
+const FILTER_ENABLED = isAgroFilterEnabled();
+const EXTRA_BLOCKLIST = resolveExtraBlocklist();
+const GNEWS_QUERY = resolveGNewsQuery();
+
+const query = encodeURIComponent(GNEWS_QUERY);
 const baseUrl =
   "https://gnews.io/api/v4/search?q=" +
   query +
   "&lang=pt&country=br&sortby=publishedAt&nullable=image&max=" +
   PAGE_SIZE +
-  "&apikey=" +
+  "&in=title,description&apikey=" +
   encodeURIComponent(key);
 
 function normUrl(u) {
@@ -68,6 +80,11 @@ function normUrl(u) {
 function pubTime(item) {
   const t = Date.parse(item.publishedAt || "");
   return Number.isFinite(t) ? t : 0;
+}
+
+function applyAgroFilter(items) {
+  if (!FILTER_ENABLED) return items;
+  return filterAgroNews(items, { extraBlocklist: EXTRA_BLOCKLIST, enabled: true });
 }
 
 function mapArticle(a) {
@@ -99,11 +116,13 @@ async function fetchPage(page) {
 }
 
 async function fetchFreshFromApi() {
-  const items = [];
+  const rawItems = [];
   const seen = new Set();
-  const maxPages = Math.min(20, Math.ceil(FETCH_BATCH / PAGE_SIZE) + 2);
+  const maxPages = FILTER_ENABLED
+    ? Math.min(30, Math.ceil((FETCH_BATCH * 4) / PAGE_SIZE) + 2)
+    : Math.min(20, Math.ceil(FETCH_BATCH / PAGE_SIZE) + 2);
 
-  for (let page = 1; page <= maxPages && items.length < FETCH_BATCH; page++) {
+  for (let page = 1; page <= maxPages; page++) {
     const articles = await fetchPage(page);
     if (!articles.length) break;
 
@@ -113,17 +132,32 @@ async function fetchFreshFromApi() {
       const k = normUrl(x.url);
       if (seen.has(k)) continue;
       seen.add(k);
-      items.push(x);
-      if (items.length >= FETCH_BATCH) break;
+      rawItems.push(x);
     }
 
+    const filtered = applyAgroFilter(rawItems);
+    if (filtered.length >= FETCH_BATCH) break;
     if (articles.length < PAGE_SIZE) break;
 
     await new Promise(function (r) {
       setTimeout(r, 300);
     });
   }
-  return items;
+
+  const filtered = applyAgroFilter(rawItems);
+  const result = filtered.slice(0, FETCH_BATCH);
+
+  if (FILTER_ENABLED && rawItems.length > result.length) {
+    console.log(
+      "Filtro agro:",
+      rawItems.length - filtered.length,
+      "descartada(s);",
+      result.length,
+      "mantida(s) nesta execução."
+    );
+  }
+
+  return result;
 }
 
 function loadExistingItems() {
@@ -132,9 +166,10 @@ function loadExistingItems() {
     const raw = fs.readFileSync(outPath, "utf8");
     const prev = JSON.parse(raw);
     if (prev && Array.isArray(prev.items)) {
-      return prev.items.filter(function (it) {
+      const items = prev.items.filter(function (it) {
         return it && it.url && it.title;
       });
+      return applyAgroFilter(items);
     }
   } catch {
     /* mantém vazio */
@@ -169,7 +204,7 @@ function mergeArchive(existing, incoming) {
     });
   }
 
-  let arr = Array.from(map.values());
+  let arr = applyAgroFilter(Array.from(map.values()));
   arr.sort(function (a, b) {
     return pubTime(b) - pubTime(a);
   });
@@ -188,7 +223,7 @@ try {
 }
 
 if (!incoming.length) {
-  console.error("Nenhum artigo novo retornado pela API.");
+  console.error("Nenhum artigo relevante retornado pela API (após filtro agro).");
   process.exit(1);
 }
 
@@ -202,7 +237,9 @@ const payload = {
   fetchedAt: new Date().toISOString(),
   source: "gnews",
   archiveMax: ARCHIVE_MAX,
-  lastFetchCount: incoming.length
+  lastFetchCount: incoming.length,
+  query: GNEWS_QUERY,
+  filterAgro: FILTER_ENABLED
 };
 
 fs.writeFileSync(outPath, JSON.stringify(payload, null, 2) + "\n", "utf8");

@@ -1,0 +1,52 @@
+# Atualiza noticias.json 1x por dia: soma 10 notícias ao arquivo e mantém no máx. 60 (remove as mais antigas).
+#
+# Configure no repositório GitHub:
+#   Settings → Secrets and variables → Actions → New repository secret
+#   Nome: GNEWS_API_KEY   Valor: sua chave da GNews
+#
+# Horário: 12:00 em Brasília (UTC−3) ≈ 15:00 UTC.
+# Execução manual: Actions → "Atualizar notícias (GNews)" → Run workflow
+
+name: Atualizar notícias (GNews)
+
+on:
+  schedule:
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-noticias
+  cancel-in-progress: true
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Buscar GNews e gravar noticias.json
+        env:
+          GNEWS_API_KEY: ${{ secrets.GNEWS_API_KEY }}
+          GNEWS_MAX_ARTICLES: "10"
+          GNEWS_PAGE_SIZE: "10"
+          GNEWS_ARCHIVE_MAX: "70"
+        run: node scripts/fetch-gnews.mjs
+
+      - name: Commit se houver mudança
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add noticias.json
+          if git diff --staged --quiet; then
+            echo "Sem alterações em noticias.json."
+          else
+            git commit -m "chore: atualizar cache de notícias (GNews)"
+            git push
+          fi
