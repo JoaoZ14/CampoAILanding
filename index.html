@@ -2,20 +2,20 @@
 <html lang="pt-BR" id="top">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#2a382a">
-<meta name="description" content="Orientação prática para lavoura e rebanho pelo WhatsApp. Tire dúvidas, envie fotos e receba respostas rápidas no campo. Planos gratuito e mensal.">
+<meta name="description" content="AG Assist: orientação prática para lavoura e rebanho pelo WhatsApp. Tire dúvidas, envie fotos e receba respostas rápidas no campo.">
 
-<!-- Notícias e cotações: JSON no mesmo host (Netlify). Em localhost o script usa noticias.json/cotacoes.json na mesma origem. -->
-<meta name="campoai-noticias-json" content="noticias.json">
+<!-- Notícias: GET no backend (DuckDNS). Em localhost o script usa noticias.json na mesma origem. Cotações: cotacoes.json no mesmo host. -->
+<meta name="campoai-noticias-json" content="https://agassist.duckdns.org/api/noticias">
 <!-- Cotações: por padrão, cotacoes.json no mesmo host -->
 <meta name="campoai-cotacoes-json" content="cotacoes.json">
 
-<title>AG Assist</title>
+<title>AG Assist — orientação no WhatsApp</title>
 
 <link rel="icon" href="assets/Logo CampoLead (1)-Photoroom.png" type="image/png">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
@@ -48,7 +48,7 @@ html { scroll-behavior: smooth; }
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Source Sans 3', system-ui, sans-serif;
   color: var(--text);
   line-height: 1.65;
   background: #fdfcfa;
@@ -99,6 +99,7 @@ body {
 
 body.menu-open {
   overflow: hidden;
+  touch-action: none;
 }
 
 .container {
@@ -146,7 +147,7 @@ nav {
   gap: 28px;
 }
 
-nav a {
+nav a:not(.btn) {
   text-decoration: none;
   color: var(--green-dark);
   font-weight: 500;
@@ -157,35 +158,111 @@ nav a:not(.btn):hover {
   color: var(--field-dark);
 }
 
+.header-nav-desktop {
+  display: none;
+  align-items: center;
+  gap: 28px;
+  flex-shrink: 0;
+}
+
+.header-nav-desktop a:not(.btn) {
+  text-decoration: none;
+  color: var(--green-dark);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.header-nav-desktop a:not(.btn):hover {
+  color: var(--field-dark);
+}
+
+.header-nav-desktop .btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .menu-toggle {
   display: none;
-  font-size: 1.35rem;
-  line-height: 1;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid rgba(42, 56, 42, 0.12);
-  border-radius: var(--radius);
-  background: #fff;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: var(--field-soft);
   color: var(--green-dark);
   cursor: pointer;
   font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.nav-backdrop {
+.menu-toggle__bars {
+  position: relative;
+  display: block;
+  width: 20px;
+  height: 14px;
+}
+
+.menu-toggle__bars span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.25s ease, opacity 0.2s ease, top 0.25s ease;
+}
+
+.menu-toggle__bars span:nth-child(1) { top: 0; }
+.menu-toggle__bars span:nth-child(2) { top: 6px; }
+.menu-toggle__bars span:nth-child(3) { top: 12px; }
+
+.menu-toggle[aria-expanded="true"] .menu-toggle__bars span:nth-child(1) {
+  top: 6px;
+  transform: rotate(45deg);
+}
+
+.menu-toggle[aria-expanded="true"] .menu-toggle__bars span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle[aria-expanded="true"] .menu-toggle__bars span:nth-child(3) {
+  top: 6px;
+  transform: rotate(-45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-toggle__bars span {
+    transition: none;
+  }
+}
+
+.nav-sheet__handle,
+.nav-sheet__label {
+  display: none;
+}
+
+.nav-scrim {
   display: none;
 }
 
 @media (max-width: 768px) {
-  .nav-backdrop.is-open {
+  .nav-scrim {
     display: block;
-    position: fixed;
+    position: absolute;
     inset: 0;
-    z-index: 999;
+    z-index: 0;
+    border: 0;
     margin: 0;
     padding: 0;
-    border: 0;
-    background: rgba(42, 56, 42, 0.22);
+    background: rgba(42, 56, 42, 0.45);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  nav:not(.active) .nav-scrim {
+    display: none;
   }
 }
 
@@ -303,6 +380,7 @@ section h2 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
@@ -313,17 +391,17 @@ section h2 {
   z-index: 1;
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,1) 0%,
-    rgba(255,255,255,0.75) 18%,
-    rgba(255,255,255,0.2) 45%,
-    rgba(255,255,255,0) 65%
+    rgba(253, 252, 250, 1) 0%,
+    rgba(253, 252, 250, 0.88) 28%,
+    rgba(253, 252, 250, 0.45) 52%,
+    rgba(253, 252, 250, 0) 72%
   );
 }
 
 .hero h1 {
   font-family: 'Source Serif 4', Georgia, serif;
-  font-size: clamp(2rem, 4.2vw, 3rem);
-  line-height: 1.12;
+  font-size: clamp(2.35rem, 5vw, 3.35rem);
+  line-height: 1.08;
   color: var(--green-dark);
   max-width: 34rem;
   letter-spacing: -0.03em;
@@ -333,11 +411,18 @@ section h2 {
 
 .hero-h1-break {
   display: block;
+  margin-top: 0.55rem;
+  font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--text);
+  max-width: 28rem;
 }
 
 .hero p {
   margin-top: 1.15rem;
-  max-width: 34rem;
+  max-width: 32rem;
   font-size: 1.05rem;
   color: var(--text-muted);
 }
@@ -364,13 +449,14 @@ section h2 {
 
 .grid-audiencia {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 40px;
 }
 
 @media (max-width: 960px) {
   .grid-audiencia {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
   }
 }
 
@@ -511,7 +597,7 @@ section.como .como-copy h2 {
 
 .plans {
   display: grid;
-  grid-template-columns: 1fr 1px 1fr;
+  grid-template-columns: 1fr 1px 1fr 1px 1fr;
 }
 
 .divider {
@@ -576,8 +662,12 @@ section.como .como-copy h2 {
   color: var(--green-dark);
 }
 
-.plan--mensal {
+.plan--featured {
   background: linear-gradient(160deg, var(--field-soft) 0%, rgba(42, 56, 42, 0.05) 100%);
+}
+
+.plan--free .price-value {
+  font-size: clamp(1.65rem, 4vw, 1.95rem);
 }
 
 .plan-badge {
@@ -757,7 +847,6 @@ section.como .como-copy h2 {
   position: relative;
   width: 100%;
   overflow: hidden;
-  transition: max-height 0.5s ease;
 }
 
 .noticias-wrap--collapsed {
@@ -779,6 +868,12 @@ section.como .como-copy h2 {
     rgba(253, 252, 250, 0.55) 38%,
     #fdfcfa 88%
   );
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.noticias-fade[hidden] {
+  opacity: 0;
 }
 
 .noticias-ver-mais {
@@ -950,17 +1045,15 @@ section.como .como-copy h2 {
   top: 50%;
   width: 0.45rem;
   height: 0.45rem;
-  margin-top: -0.2rem;
   border-right: 2px solid var(--field-dark);
   border-bottom: 2px solid var(--field-dark);
-  transform: rotate(45deg);
+  transform: translateY(-60%) rotate(45deg);
   opacity: 0.85;
-  transition: transform 0.2s ease, margin-top 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .faq details[open] summary::after {
-  margin-top: 0.1rem;
-  transform: rotate(-135deg);
+  transform: translateY(-20%) rotate(-135deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1034,11 +1127,56 @@ footer {
   flex-wrap: wrap;
 }
 
+.cta-close {
+  text-align: center;
+  padding-block: 4.5rem;
+}
+
+.cta-close h2 {
+  border-bottom: none;
+  margin-inline: auto;
+  margin-bottom: 1rem;
+  padding-bottom: 0;
+}
+
+.cta-close p {
+  max-width: 32rem;
+  margin: 0 auto 1.5rem;
+  color: var(--text-muted);
+}
+
+.cta-close .hero-buttons {
+  justify-content: center;
+  margin-top: 0;
+}
+
+.section-lede {
+  margin: -1.25rem 0 2rem;
+  max-width: 40rem;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.quote-card__price--unavailable strong {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
 .footer-copy a {
   color: var(--text);
 }
 
-/* RESPONSIVO */
+@media (max-width: 1024px) {
+  .plans {
+    grid-template-columns: 1fr;
+  }
+
+  .plans .divider {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
 
   .grid-3,
@@ -1060,55 +1198,164 @@ footer {
   }
 
   nav {
-    display: none;
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    left: auto;
-    min-width: min(280px, calc(100vw - 2.5rem));
-    background: #fff;
-    padding: 0.75rem 1rem 1rem;
-    border: 1px solid rgba(42, 56, 42, 0.1);
-    border-radius: var(--radius);
-    box-shadow: 0 12px 40px rgba(42, 56, 42, 0.12);
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 4px;
-    z-index: 1001;
+    justify-content: flex-end;
+    padding: 0;
+    margin: 0;
+    pointer-events: none;
+    visibility: hidden;
+    isolation: isolate;
   }
 
   nav.active {
-    display: flex;
+    pointer-events: auto;
+    visibility: visible;
   }
 
-  nav.active a:not(.btn) {
-    min-height: 44px;
+  .nav-sheet {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    padding: 0.35rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -12px 48px rgba(42, 56, 42, 0.18);
+    transform: translateY(105%);
+    transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+  }
+
+  nav.active .nav-sheet {
+    transform: translateY(0);
+  }
+
+  .nav-sheet__handle {
+    display: block;
+    width: 40px;
+    height: 4px;
+    margin: 0.65rem auto 0.85rem;
+    border-radius: 999px;
+    background: rgba(42, 56, 42, 0.18);
+  }
+
+  .nav-sheet__label {
+    display: block;
+    margin: 0 0 0.35rem;
+    padding-inline: 0.15rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .nav-sheet__links {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .nav-sheet__links a {
     display: flex;
     align-items: center;
-    padding-inline: 0.35rem;
-    border-radius: 4px;
+    justify-content: space-between;
+    min-height: 52px;
+    padding: 0.65rem 0.15rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--green-dark);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(42, 56, 42, 0.08);
+    border-radius: 0;
+    background: transparent;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  nav.active a:not(.btn):active {
+  .nav-sheet__links a::after {
+    display: block;
+    content: "";
+    width: 0.45rem;
+    height: 0.45rem;
+    border-right: 2px solid var(--field-dark);
+    border-bottom: 2px solid var(--field-dark);
+    transform: rotate(-45deg);
+    opacity: 0.55;
+    flex-shrink: 0;
+    margin-left: 1rem;
+  }
+
+  .nav-sheet__links a:active {
     background: var(--field-soft);
+    margin-inline: -0.5rem;
+    padding-inline: 0.65rem;
+    border-radius: 10px;
   }
 
-  nav.active .btn {
+  .nav-sheet__cta {
     width: 100%;
     justify-content: center;
-    margin-top: 0.35rem;
+    margin-top: 1rem;
+    min-height: 52px;
+    font-size: 1rem;
+    border-radius: 14px;
+    color: #fff;
+    white-space: nowrap;
   }
 
   .menu-toggle {
-    display: block;
+    display: inline-flex;
+    position: relative;
+    z-index: 1002;
+  }
+
+  body.menu-open .menu-toggle {
+    background: rgba(253, 252, 250, 0.92);
+    box-shadow: 0 1px 6px rgba(42, 56, 42, 0.1);
+  }
+
+  body.menu-open header {
+    z-index: 1002;
+  }
+
+  .header-inner {
+    height: 64px;
+  }
+
+  .logo img {
+    height: 46px;
   }
 
   .hero h1 {
-    font-size: clamp(1.75rem, 6vw, 2.25rem);
+    font-size: clamp(2rem, 8vw, 2.6rem);
+  }
+
+  .hero-h1-break {
+    font-size: clamp(1.05rem, 4.2vw, 1.25rem);
   }
 
   .hero-media {
-    display: none;
+    min-height: min(44vh, 380px);
+    order: -1;
+  }
+
+  .hero-media::before {
+    background: linear-gradient(
+      to bottom,
+      rgba(253, 252, 250, 0) 0%,
+      rgba(253, 252, 250, 0.35) 55%,
+      rgba(253, 252, 250, 0.92) 100%
+    );
+  }
+
+  .hero-media img {
+    object-position: center 40%;
   }
 
   .hero-shell {
@@ -1117,7 +1364,7 @@ footer {
   }
 
   .hero-copy-wrap {
-    padding-block: clamp(2.5rem, 10vw, 4rem);
+    padding-block: clamp(1.75rem, 8vw, 3rem);
   }
 
   .como-shell {
@@ -1167,6 +1414,23 @@ footer {
 
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .nav-sheet {
+    transition: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .header-nav-desktop {
+    display: flex;
+  }
+
+  #menu,
+  .menu-toggle {
+    display: none !important;
+  }
+}
+
 @media (max-width: 560px) {
   .footer-grid {
     grid-template-columns: 1fr;
@@ -1182,10 +1446,10 @@ footer {
 
 <header>
   <div class="container header-inner">
-    <a href="#top" class="logo" aria-label="CampoLead — início">
+    <a href="#top" class="logo" aria-label="AG Assist — início">
       <img
         src="assets/Logo CampoLead (1)-Photoroom.png"
-        alt="CampoLead"
+        alt="AG Assist"
         width="216"
         height="54"
         loading="eager"
@@ -1193,20 +1457,32 @@ footer {
       />
     </a>
 
-    <button type="button" id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="menu" aria-label="Abrir menu">☰</button>
+    <button type="button" id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="menu" aria-label="Abrir menu">
+      <span class="menu-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
 
-    <nav id="menu" aria-label="Principal">
+    <div class="header-nav-desktop">
       <a href="#como">Como funciona</a>
-      <a href="#cotacoes">Cotações</a>
-      <a href="#noticias">Notícias</a>
       <a href="#planos">Planos</a>
       <a href="#faq">FAQ</a>
-      <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp — abre em nova aba">WhatsApp</a>
-    </nav>
+      <a href="https://wa.me/5524988685043?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp — abre em nova aba">WhatsApp</a>
+    </div>
   </div>
 </header>
 
-<button type="button" id="nav-backdrop" class="nav-backdrop" aria-label="Fechar menu" tabindex="-1" hidden></button>
+<nav id="menu" aria-label="Principal" aria-hidden="true">
+  <button type="button" class="nav-scrim" aria-label="Fechar menu" tabindex="-1"></button>
+  <div class="nav-sheet">
+    <div class="nav-sheet__handle" aria-hidden="true"></div>
+    <p class="nav-sheet__label">Menu</p>
+    <div class="nav-sheet__links">
+      <a href="#como">Como funciona</a>
+      <a href="#planos">Planos</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a href="https://wa.me/5524988685043?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary nav-sheet__cta" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp — abre em nova aba">Falar no WhatsApp</a>
+  </div>
+</nav>
 
 <main id="conteudo-principal" tabindex="-1">
 <section class="hero">
@@ -1214,24 +1490,27 @@ footer {
     <div class="hero-copy-wrap">
       <div class="hero-copy">
         <h1>
-          Orientação prática para quem vive a lida no campo
-          <span class="hero-h1-break">Direto no WhatsApp</span>
+          AG Assist
+          <span class="hero-h1-break">Orientação prática no campo, direto no WhatsApp</span>
         </h1>
-        <p>Tire dúvidas, envie fotos e receba respostas claras para decisões rápidas no campo — também como <strong>apoio a quem trabalha no agro</strong> (técnicos da agricultura, engenheiros agrônomos, zootecnistas, florestais, consultores, assistência técnica e afins).</p>
+        <p>Tire dúvidas, envie fotos e receba respostas claras para decidir rápido na lavoura ou no rebanho.</p>
 
         <div class="hero-buttons">
-          <a href="https://wa.me/12183878223?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="Começar grátis no WhatsApp — abre em nova aba">Começar grátis</a>
+          <a href="https://wa.me/5524988685043?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="Começar no WhatsApp — abre em nova aba">Começar no WhatsApp</a>
           <a href="#planos" class="btn btn-secondary">Ver planos</a>
         </div>
-        <p class="hero-trial">Experimente grátis e veja na prática.</p>
+        <p class="hero-trial">Plano gratuito para começar · pagos a partir de R$&nbsp;29/mês.</p>
       </div>
     </div>
 
-    <div class="hero-media" aria-hidden="true">
+    <div class="hero-media">
       <img
-        src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=1600&q=80"
-        alt=""
+        src="assets/hero-agro.jpg"
+        alt="Lavoura verde em plantação no campo brasileiro"
+        width="1920"
+        height="1280"
         loading="eager"
+        decoding="async"
       />
     </div>
   </div>
@@ -1250,12 +1529,8 @@ footer {
         <p>Apoio prático no manejo do rebanho</p>
       </div>
       <div class="block">
-        <h3>Profissionais do campo</h3>
-        <p>Técnicos e engenheiros do agro, consultores e equipes de campo: segunda leitura, cálculos, referência e forma clara de explicar ao produtor — sem substituir sua responsabilidade técnica nem as exigências do seu conselho de classe e da legislação</p>
-      </div>
-      <div class="block">
-        <h3>No campo</h3>
-        <p>Resolve dúvidas por mensagem ou foto, onde a internet permitir</p>
+        <h3>Profissionais do agro</h3>
+        <p>Segunda leitura e agilidade no atendimento — sem substituir sua responsabilidade técnica</p>
       </div>
     </div>
   </div>
@@ -1311,51 +1586,29 @@ footer {
   </div>
 </section>
 
-<section id="cotacoes" class="container" aria-labelledby="cotacoes-titulo">
-  <h2 id="cotacoes-titulo">Cotações</h2>
-
-  <p id="cotacoes-status" class="noticias-status" role="status">Carregando cotações…</p>
-
-  <div class="cotacoes-controls" aria-label="Filtros de cotações">
-    <label class="sr-only" for="cotacoes-commodity">Produto</label>
-    <select id="cotacoes-commodity" class="cotacoes-select"></select>
-
-    <label class="sr-only" for="cotacoes-uf">UF</label>
-    <select id="cotacoes-uf" class="cotacoes-select"></select>
-  </div>
-
-  <ul id="cotacoes-grid" class="cotacoes-grid" aria-live="polite" aria-busy="true"></ul>
-  <p id="cotacoes-updated" class="cotacoes-updated" hidden></p>
-</section>
-
-<section id="noticias" class="container" aria-labelledby="noticias-titulo">
-  <h2 id="noticias-titulo">Notícias do agro</h2>
-
-  <p id="noticias-status" class="noticias-status" role="status">Carregando notícias…</p>
-
-  <div class="noticias-stack">
-    <div class="noticias-wrap" id="noticias-wrap">
-      <ul id="noticias-grid" class="news-grid" aria-live="polite" aria-busy="true"></ul>
-      <div id="noticias-fade" class="noticias-fade" hidden aria-hidden="true"></div>
-    </div>
-    <button
-      type="button"
-      id="noticias-ver-mais"
-      class="noticias-ver-mais btn btn-secondary"
-      hidden
-      aria-controls="noticias-grid"
-      aria-expanded="false"
-    >
-      Ver mais
-    </button>
-  </div>
-</section>
-
 <section id="planos" class="container" aria-labelledby="planos-titulo">
   <h2 id="planos-titulo">Planos</h2>
 
   <div class="plans-wrapper">
     <div class="plans">
+
+      <div class="plan plan--free">
+        <div>
+          <h3>Gratuito</h3>
+          <p class="price">
+            <span class="price-label">Comece assim</span>
+            <span class="price-value">R$&nbsp;0</span>
+          </p>
+          <ul>
+            <li>Atendimento pelo WhatsApp</li>
+            <li>Texto, fotos e áudios</li>
+            <li>Mesma velocidade de resposta</li>
+          </ul>
+        </div>
+        <a href="https://wa.me/5524988685043?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist.%20Quero%20come%C3%A7ar%20no%20plano%20gratuito." class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="Começar no plano gratuito pelo WhatsApp — abre em nova aba">Começar no WhatsApp</a>
+      </div>
+
+      <div class="divider"></div>
 
       <div class="plan">
         <div>
@@ -1370,20 +1623,21 @@ footer {
             <li>Cadastro com CPF</li>
           </ul>
         </div>
-        <a href="https://agassist.duckdns.org/planos" class="btn btn-secondary" target="_blank" rel="noopener noreferrer" aria-label="Ver planos e assinar — Plano Pessoal (abre em nova aba)">Ver planos e assinar</a>
+        <a href="https://agassist.duckdns.org/planos" class="btn btn-secondary" target="_blank" rel="noopener noreferrer" aria-label="Assinar Plano Pessoal — abre em nova aba">Assinar Pessoal</a>
       </div>
 
       <div class="divider"></div>
 
-      <div class="plan plan--mensal">
+      <div class="plan plan--featured">
         <div>
+          <span class="plan-badge">Equipes</span>
           <h3>Plano Empresa</h3>
           <p class="price">
             <span class="price-label">A partir de</span>
             <span class="price-value">R$&nbsp;199<span class="price-unit">/mês</span></span>
           </p>
           <p class="plan-note">
-            Os planos Empresa são para <strong>a partir de 5 números</strong> no WhatsApp (equipe).
+            Para <strong>a partir de 5 números</strong> no WhatsApp (equipe).
           </p>
           <ul>
             <li>Plano para pessoa jurídica</li>
@@ -1391,7 +1645,7 @@ footer {
             <li>Cadastro com CNPJ</li>
           </ul>
         </div>
-        <a href="https://agassist.duckdns.org/planos" class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="Ver planos e assinar — Plano Empresa (abre em nova aba)">Ver planos e assinar</a>
+        <a href="https://agassist.duckdns.org/planos" class="btn btn-secondary" target="_blank" rel="noopener noreferrer" aria-label="Assinar Plano Empresa — abre em nova aba">Assinar Empresa</a>
       </div>
 
     </div>
@@ -1404,7 +1658,7 @@ footer {
         </svg>
       </span>
       <p class="plans-footnote__text">
-        Valores e limites exatos estão na
+        Limites e condições dos planos pagos estão na
         <a href="https://agassist.duckdns.org/planos" class="plans-footnote__link" target="_blank" rel="noopener noreferrer" aria-label="Página de planos (abre em nova aba)">página de planos</a>.
       </p>
     </div>
@@ -1438,12 +1692,12 @@ footer {
 
       <details>
         <summary>Quanto tempo leva para responder?</summary>
-        <p>Na prática as respostas chegam em <strong>poucos segundos</strong>. Só pode levar um pouco mais se a pergunta for muito extensa ou vier com <strong>muitas fotos ou áudios</strong> para analisar. <strong>Não existe prioridade de fila</strong> entre gratuito e mensal: o atendimento é o mesmo em velocidade.</p>
+        <p>Na prática as respostas chegam em <strong>poucos segundos</strong>. Só pode levar um pouco mais se a pergunta for muito extensa ou vier com <strong>muitas fotos ou áudios</strong> para analisar. <strong>Não existe prioridade de fila</strong> entre gratuito e planos pagos: o atendimento é o mesmo em velocidade.</p>
       </details>
 
       <details>
-        <summary>O que está incluso no gratuito e no mensal?</summary>
-        <p>Os <strong>mesmos tipos</strong> de atendimento (texto, fotos, áudios e nível de detalhe nas respostas). O que muda de um plano para o outro (valor e condições de uso) você vê na <strong>seção Planos</strong> e na hora de <strong>assinar</strong>, na página de planos.</p>
+        <summary>O que muda entre gratuito e os planos pagos?</summary>
+        <p>Os <strong>mesmos tipos</strong> de atendimento (texto, fotos, áudios e nível de detalhe nas respostas). O gratuito basta para começar pelo WhatsApp; Pessoal e Empresa trazem cadastro e condições comerciais — detalhes na <strong>seção Planos</strong> e na página de assinatura.</p>
       </details>
 
       <details>
@@ -1453,7 +1707,7 @@ footer {
 
       <details>
         <summary>Profissionais do agro (técnico, engenheiro, consultor…) podem usar como apoio?</summary>
-        <p>Sim — quem atua no campo ou na consultoria (técnico da agricultura, engenheiro, zootecnista, florestal, consultor, assistência técnica…) pode usar para <strong>ganhar agilidade</strong>: checagem de raciocínio, sugestão de cálculo, lembrete de boas práticas ou linguagem mais clara para o cliente. <strong>Conselho de classe</strong>, <strong>receituário</strong>, <strong>ART</strong> e a <strong>decisão técnica final</strong> continuam sendo <strong>sua responsabilidade</strong> — o AG Assist é apoio por mensagem, não laudo nem parecer formal assinado.</p>
+        <p>Sim — quem atua no campo ou na consultoria pode usar para <strong>ganhar agilidade</strong>: checagem de raciocínio, sugestão de cálculo, lembrete de boas práticas ou linguagem mais clara para o cliente. <strong>Conselho de classe</strong>, <strong>receituário</strong>, <strong>ART</strong> e a <strong>decisão técnica final</strong> continuam sendo <strong>sua responsabilidade</strong> — o AG Assist é apoio por mensagem, não laudo nem parecer formal assinado.</p>
       </details>
 
       <details>
@@ -1468,6 +1722,59 @@ footer {
     </div>
   </div>
 </section>
+
+<section class="cta-close container" aria-labelledby="cta-close-titulo">
+  <h2 id="cta-close-titulo">Pronto para tirar a dúvida no campo?</h2>
+  <p>Abra o WhatsApp, descreva a situação ou envie uma foto e receba orientação em segundos.</p>
+  <div class="hero-buttons">
+    <a href="https://wa.me/5524988685043?text=Ol%C3%A1%21%20Vim%20pela%20landing%20do%20AG%20Assist." class="btn btn-primary" target="_blank" rel="noopener noreferrer" aria-label="Abrir WhatsApp do AG Assist — abre em nova aba">Abrir WhatsApp</a>
+    <a href="#planos" class="btn btn-secondary">Ver planos</a>
+  </div>
+</section>
+
+<section id="cotacoes" class="bg-light" aria-labelledby="cotacoes-titulo">
+  <div class="container">
+    <h2 id="cotacoes-titulo">Cotações</h2>
+    <p class="section-lede">Referência rápida de mercado — recurso extra, fora do fluxo principal do AG Assist.</p>
+
+    <p id="cotacoes-status" class="noticias-status" role="status">Carregando cotações…</p>
+
+    <div class="cotacoes-controls" aria-label="Filtros de cotações">
+      <label class="sr-only" for="cotacoes-commodity">Produto</label>
+      <select id="cotacoes-commodity" class="cotacoes-select"></select>
+
+      <label class="sr-only" for="cotacoes-uf">UF</label>
+      <select id="cotacoes-uf" class="cotacoes-select"></select>
+    </div>
+
+    <ul id="cotacoes-grid" class="cotacoes-grid" aria-live="polite" aria-busy="true"></ul>
+    <p id="cotacoes-updated" class="cotacoes-updated" hidden></p>
+  </div>
+</section>
+
+<section id="noticias" class="container" aria-labelledby="noticias-titulo">
+  <h2 id="noticias-titulo">Notícias do agro</h2>
+  <p class="section-lede">Leitura opcional com links para fontes externas.</p>
+
+  <p id="noticias-status" class="noticias-status" role="status">Carregando notícias…</p>
+
+  <div class="noticias-stack">
+    <div class="noticias-wrap" id="noticias-wrap">
+      <ul id="noticias-grid" class="news-grid" aria-live="polite" aria-busy="true"></ul>
+      <div id="noticias-fade" class="noticias-fade" hidden aria-hidden="true"></div>
+    </div>
+    <button
+      type="button"
+      id="noticias-ver-mais"
+      class="noticias-ver-mais btn btn-secondary"
+      hidden
+      aria-controls="noticias-grid"
+      aria-expanded="false"
+    >
+      Ver mais
+    </button>
+  </div>
+</section>
 </main>
 
 <footer>
@@ -1477,7 +1784,7 @@ footer {
         <h3>AG Assist</h3>
         <p>Razão social: 66.412.901 JOAO GUILHERME CANUTO POSSIDONIO</p>
         <p>CNPJ: 66.412.901/0001-07</p>
-        <p>Localização: Resende/R</p>
+        <p>Localização: Resende/RJ</p>
       </div>
 
       <div class="footer-col">
@@ -1488,8 +1795,8 @@ footer {
             <a href="mailto:joaopossidonio.dev@gmail.com">joaopossidonio.dev@gmail.com</a>
           </li>
           <li>
-            Telefone/WhatsApp:
-            <a href="https://wa.me/5524988685043" target="_blank" rel="noopener noreferrer">(24) 98868-5043 (Joao Guilherme)</a>
+            WhatsApp:
+            <a href="https://wa.me/5524988685043" target="_blank" rel="noopener noreferrer">(24) 98868-5043</a>
           </li>
           <li>
             Instagram:
@@ -1502,10 +1809,10 @@ footer {
         <h3>Links úteis</h3>
         <ul>
           <li><a href="#como">Como funciona</a></li>
-          <li><a href="#cotacoes">Cotações</a></li>
-          <li><a href="#noticias">Notícias</a></li>
           <li><a href="#planos">Planos</a></li>
           <li><a href="#faq">FAQ</a></li>
+          <li><a href="#cotacoes">Cotações</a></li>
+          <li><a href="#noticias">Notícias</a></li>
         </ul>
       </div>
 
@@ -1535,16 +1842,38 @@ footer {
 (function () {
   var nav = document.getElementById("menu");
   var btn = document.getElementById("menu-toggle");
-  var backdrop = document.getElementById("nav-backdrop");
+  var scrim = nav && nav.querySelector(".nav-scrim");
+  var scrollY = 0;
+
+  function lockScroll() {
+    scrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.position = "fixed";
+    document.body.style.top = "-" + scrollY + "px";
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+  }
+
+  function unlockScroll() {
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.width = "";
+    window.scrollTo(0, scrollY);
+  }
+
   function setMenuOpen(open) {
     if (!nav || !btn) return;
     nav.classList.toggle("active", open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
     btn.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+    nav.setAttribute("aria-hidden", open ? "false" : "true");
     document.body.classList.toggle("menu-open", open);
-    if (backdrop) {
-      backdrop.classList.toggle("is-open", open);
-      backdrop.hidden = !open;
+    if (open) {
+      lockScroll();
+    } else {
+      unlockScroll();
     }
   }
 
@@ -1558,9 +1887,13 @@ function toggleMenu() {
 
   if (btn) btn.addEventListener("click", toggleMenu);
 
-  if (backdrop) backdrop.addEventListener("click", closeMenu);
+  if (scrim) scrim.addEventListener("click", closeMenu);
 
   if (nav) {
+    nav.addEventListener("click", function (e) {
+      if (e.target === nav) closeMenu();
+    });
+
     nav.querySelectorAll("a").forEach(function (a) {
       a.addEventListener("click", closeMenu);
     });
@@ -1604,7 +1937,7 @@ function toggleMenu() {
 
   function formatMoney(value, currency) {
     var n = Number(value);
-    if (!isFinite(n)) return "—";
+    if (!isFinite(n) || n <= 0) return null;
     try {
       return n.toLocaleString("pt-BR", { style: "currency", currency: currency || "BRL" });
     } catch (e) {
@@ -1715,21 +2048,24 @@ function toggleMenu() {
       var unit = escapeHtml(item.unit || "");
       var dateStr = formatDate(item.date);
       var price = formatMoney(item.price, item.currency || "BRL");
+      var priceUnavailable = !price;
 
       var pills = (uf ? '<span class="quote-pill" aria-label="UF">' + uf + "</span>" : "") +
                   (source ? '<span class="quote-pill" aria-label="Fonte">' + source + "</span>" : "");
 
       var meta = [];
       if (dateStr) meta.push("Data: " + escapeHtml(dateStr));
-      if (unit) meta.push("Unidade: " + unit);
+      if (unit && !priceUnavailable) meta.push("Unidade: " + unit);
 
       return (
         '<li class="quote-card">' +
           '<div class="quote-card__body">' +
             '<h3 class="quote-card__title">' + commodity + "</h3>" +
             '<div class="quote-card__meta">' + pills + "</div>" +
-            '<div class="quote-card__price"><strong>' + escapeHtml(price) + '</strong>' +
-              (unit ? '<span class="quote-card__unit">' + unit + "</span>" : "") +
+            '<div class="quote-card__price' + (priceUnavailable ? " quote-card__price--unavailable" : "") + '"><strong>' +
+              (priceUnavailable ? "Indisponível" : escapeHtml(price)) +
+            '</strong>' +
+              (!priceUnavailable && unit ? '<span class="quote-card__unit">' + unit + "</span>" : "") +
             "</div>" +
             (meta.length ? '<p class="quote-card__meta">' + meta.join(" · ") + "</p>" : "") +
           "</div>" +
@@ -1745,8 +2081,12 @@ function toggleMenu() {
   }
 
   var allItems = [];
+  var usingFallback = false;
   loadFromJson().then(function (res) {
     allItems = Array.isArray(res.items) ? res.items : [];
+    usingFallback = !res.fetchedAt && allItems.every(function (it) {
+      return !Number(it.price) || Number(it.price) <= 0;
+    });
 
     buildFilters(allItems);
     render(applyFilters(allItems));
@@ -1762,6 +2102,9 @@ function toggleMenu() {
       if (res.fetchedAt) {
         var updated = formatDate(res.fetchedAt);
         updatedEl.textContent = updated ? ("Atualizado em " + updated + ".") : "Atualizado recentemente.";
+        updatedEl.hidden = false;
+      } else if (usingFallback) {
+        updatedEl.textContent = "Valores indisponíveis no momento. Mostrando produtos de referência sem cotação.";
         updatedEl.hidden = false;
       } else {
         updatedEl.hidden = true;
@@ -1942,6 +2285,8 @@ function toggleMenu() {
     wrapEl.style.maxHeight = "";
     fadeEl.hidden = true;
     verMaisEl.hidden = true;
+    verMaisEl.textContent = "Ver mais";
+    verMaisEl.setAttribute("aria-expanded", "false");
 
     var cardCount = grid.querySelectorAll(".news-card").length;
     if (cardCount <= NOTICIAS_PREVIEW) return;
@@ -1949,7 +2294,6 @@ function toggleMenu() {
     wrapEl.classList.add("noticias-wrap--collapsed");
     fadeEl.hidden = false;
     verMaisEl.hidden = false;
-    verMaisEl.setAttribute("aria-expanded", "false");
     bindCollapseLayout();
 
     requestAnimationFrame(function () {
@@ -1958,17 +2302,30 @@ function toggleMenu() {
     setTimeout(updateCollapsedMaxHeight, 400);
 
     verMaisEl.onclick = function () {
-      noticiasExpanded = true;
-      verMaisEl.setAttribute("aria-expanded", "true");
-      wrapEl.classList.remove("noticias-wrap--collapsed");
-      wrapEl.style.maxHeight = "";
-      fadeEl.hidden = true;
-      verMaisEl.hidden = true;
-      try {
-        var fourthCard = grid.querySelectorAll(".news-card")[NOTICIAS_PREVIEW];
-        var fourthLink = fourthCard && fourthCard.querySelector(".news-card__link");
-        if (fourthLink && typeof fourthLink.focus === "function") fourthLink.focus({ preventScroll: true });
-      } catch (e) {}
+      noticiasExpanded = !noticiasExpanded;
+      if (noticiasExpanded) {
+        verMaisEl.setAttribute("aria-expanded", "true");
+        verMaisEl.textContent = "Ver menos";
+        wrapEl.classList.remove("noticias-wrap--collapsed");
+        wrapEl.style.maxHeight = "";
+        fadeEl.hidden = true;
+        try {
+          var fourthCard = grid.querySelectorAll(".news-card")[NOTICIAS_PREVIEW];
+          var fourthLink = fourthCard && fourthCard.querySelector(".news-card__link");
+          if (fourthLink && typeof fourthLink.focus === "function") fourthLink.focus({ preventScroll: true });
+        } catch (e) {}
+      } else {
+        verMaisEl.setAttribute("aria-expanded", "false");
+        verMaisEl.textContent = "Ver mais";
+        wrapEl.classList.add("noticias-wrap--collapsed");
+        fadeEl.hidden = false;
+        requestAnimationFrame(function () {
+          requestAnimationFrame(updateCollapsedMaxHeight);
+        });
+        try {
+          verMaisEl.focus({ preventScroll: true });
+        } catch (e) {}
+      }
     };
   }
 
