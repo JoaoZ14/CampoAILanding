@@ -122,29 +122,53 @@ header {
 .header-inner {
   position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   height: 72px;
 }
 
 .logo {
   display: flex;
   align-items: center;
+  gap: 0.55rem;
+  flex-shrink: 0;
+  min-width: 0;
   text-decoration: none;
 }
 
 .logo img {
   display: block;
-  height: 54px;
+  height: 40px;
   width: auto;
-  max-width: min(260px, 55vw);
+  max-width: 48px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
-nav {
+.logo-wordmark {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--green-dark);
+  white-space: nowrap;
+}
+
+.header-actions {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.header-actions .btn {
+  white-space: nowrap;
+}
+
+.header-cta__short {
+  display: none;
 }
 
 nav a:not(.btn) {
@@ -160,25 +184,32 @@ nav a:not(.btn):hover {
 
 .header-nav-desktop {
   display: none;
+  flex: 1;
   align-items: center;
-  gap: 28px;
-  flex-shrink: 0;
+  justify-content: flex-end;
+  gap: 1.25rem;
+  min-width: 0;
 }
 
-.header-nav-desktop a:not(.btn) {
+.header-nav-desktop a {
   text-decoration: none;
   color: var(--green-dark);
   font-weight: 500;
   font-size: 0.95rem;
+  text-underline-offset: 4px;
 }
 
-.header-nav-desktop a:not(.btn):hover {
+.header-nav-desktop a:hover {
   color: var(--field-dark);
 }
 
-.header-nav-desktop .btn {
-  white-space: nowrap;
-  flex-shrink: 0;
+.header-nav-desktop a[aria-current="true"],
+.nav-sheet__links a[aria-current="true"] {
+  color: var(--field-dark);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--field);
+  font-weight: 600;
 }
 
 .menu-toggle {
@@ -189,7 +220,7 @@ nav a:not(.btn):hover {
   height: 44px;
   padding: 0;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--field-soft);
   color: var(--green-dark);
   cursor: pointer;
@@ -247,6 +278,10 @@ nav a:not(.btn):hover {
   display: none;
 }
 
+#menu {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .nav-scrim {
     display: block;
@@ -261,7 +296,7 @@ nav a:not(.btn):hover {
     -webkit-tap-highlight-color: transparent;
   }
 
-  nav:not(.active) .nav-scrim {
+  #menu:not(.active) .nav-scrim {
     display: none;
   }
 }
@@ -1197,7 +1232,7 @@ footer {
     display: none;
   }
 
-  nav {
+  #menu {
     position: fixed;
     inset: 0;
     z-index: 1001;
@@ -1212,7 +1247,7 @@ footer {
     isolation: isolate;
   }
 
-  nav.active {
+  #menu.active {
     pointer-events: auto;
     visibility: visible;
   }
@@ -1232,7 +1267,7 @@ footer {
     will-change: transform;
   }
 
-  nav.active .nav-sheet {
+  #menu.active .nav-sheet {
     transform: translateY(0);
   }
 
@@ -1247,13 +1282,14 @@ footer {
 
   .nav-sheet__label {
     display: block;
-    margin: 0 0 0.35rem;
+    margin: 0 0 0.5rem;
     padding-inline: 0.15rem;
-    font-size: 0.78rem;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.2rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--green-dark);
   }
 
   .nav-sheet__links {
@@ -1298,15 +1334,19 @@ footer {
     border-radius: 10px;
   }
 
-  .nav-sheet__cta {
-    width: 100%;
-    justify-content: center;
-    margin-top: 1rem;
-    min-height: 52px;
-    font-size: 1rem;
-    border-radius: 14px;
-    color: #fff;
-    white-space: nowrap;
+  .header-cta__full {
+    display: none;
+  }
+
+  .header-cta__short {
+    display: inline;
+  }
+
+  .header-actions .btn {
+    min-height: 44px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.88rem;
+    border-radius: var(--radius);
   }
 
   .menu-toggle {
@@ -1329,7 +1369,12 @@ footer {
   }
 
   .logo img {
-    height: 46px;
+    height: 36px;
+    max-width: 40px;
+  }
+
+  .logo-wordmark {
+    font-size: 1.05rem;
   }
 
   .hero h1 {
@@ -1425,9 +1470,38 @@ footer {
     display: flex;
   }
 
+  .header-actions {
+    margin-left: 0;
+  }
+
   #menu,
   .menu-toggle {
     display: none !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .logo-wordmark {
+    font-size: 0.98rem;
+  }
+
+  .header-actions {
+    gap: 0.35rem;
+  }
+
+  .header-actions .btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .logo img {
+    display: none;
+  }
+
+  .logo {
+    gap: 0;
   }
 }
 
@@ -1449,38 +1523,49 @@ footer {
     <a href="#top" class="logo" aria-label="AG Assist — início">
       <img
         src="assets/Logo CampoLead (1)-Photoroom.png"
-        alt="AG Assist"
-        width="216"
-        height="54"
+        alt=""
+        width="48"
+        height="40"
         loading="eager"
         decoding="async"
+        aria-hidden="true"
       />
+      <span class="logo-wordmark">AG Assist</span>
     </a>
 
-    <button type="button" id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="menu" aria-label="Abrir menu">
-      <span class="menu-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span>
-    </button>
+    <nav class="header-nav-desktop" aria-label="Seções">
+      <a href="#como" data-nav-section="como">Como funciona</a>
+      <a href="#planos" data-nav-section="planos">Planos</a>
+      <a href="#faq" data-nav-section="faq">Perguntas</a>
+    </nav>
 
-    <div class="header-nav-desktop">
-      <a href="#como">Como funciona</a>
-      <a href="#planos">Planos</a>
-      <a href="#faq">FAQ</a>
-      <a href="https://campoai-production-b7c7.up.railway.app/cadastro?origin=landing" class="btn btn-primary" aria-label="Começar grátis — cadastro no site">Começar grátis</a>
+    <div class="header-actions">
+      <a href="https://campoai-production-b7c7.up.railway.app/entrar" class="btn btn-secondary">Entrar</a>
+      <a
+        href="https://campoai-production-b7c7.up.railway.app/cadastro?origin=landing"
+        class="btn btn-primary header-cta"
+        aria-label="Começar grátis — cadastro no site"
+      >
+        <span class="header-cta__full">Começar grátis</span>
+        <span class="header-cta__short">Começar</span>
+      </a>
+      <button type="button" id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="menu" aria-label="Abrir seções">
+        <span class="menu-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+      </button>
     </div>
   </div>
 </header>
 
-<nav id="menu" aria-label="Principal" aria-hidden="true">
+<nav id="menu" aria-label="Seções da página" aria-hidden="true">
   <button type="button" class="nav-scrim" aria-label="Fechar menu" tabindex="-1"></button>
-  <div class="nav-sheet">
+  <div class="nav-sheet" aria-labelledby="nav-sheet-title">
     <div class="nav-sheet__handle" aria-hidden="true"></div>
-    <p class="nav-sheet__label">Menu</p>
+    <p class="nav-sheet__label" id="nav-sheet-title">AG Assist</p>
     <div class="nav-sheet__links">
-      <a href="#como">Como funciona</a>
-      <a href="#planos">Planos</a>
-      <a href="#faq">FAQ</a>
+      <a href="#como" data-nav-section="como">Como funciona</a>
+      <a href="#planos" data-nav-section="planos">Planos</a>
+      <a href="#faq" data-nav-section="faq">Perguntas</a>
     </div>
-    <a href="https://campoai-production-b7c7.up.railway.app/cadastro?origin=landing" class="btn btn-primary nav-sheet__cta" aria-label="Começar grátis — cadastro no site">Começar grátis</a>
   </div>
 </nav>
 
@@ -1810,7 +1895,7 @@ footer {
         <ul>
           <li><a href="#como">Como funciona</a></li>
           <li><a href="#planos">Planos</a></li>
-          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#faq">Perguntas</a></li>
           <li><a href="#cotacoes">Cotações</a></li>
           <li><a href="#noticias">Notícias</a></li>
         </ul>
@@ -1844,6 +1929,7 @@ footer {
   var btn = document.getElementById("menu-toggle");
   var scrim = nav && nav.querySelector(".nav-scrim");
   var scrollY = 0;
+  var lastFocus = null;
 
   function lockScroll() {
     scrollY = window.scrollY || window.pageYOffset || 0;
@@ -1863,17 +1949,60 @@ footer {
     window.scrollTo(0, scrollY);
   }
 
+  function sheetLinks() {
+    if (!nav) return [];
+    return Array.prototype.slice.call(nav.querySelectorAll(".nav-sheet__links a"));
+  }
+
+  function backgroundEls() {
+    return [
+      document.querySelector(".skip-link"),
+      document.querySelector("header .logo"),
+      document.querySelector(".header-nav-desktop"),
+      document.getElementById("conteudo-principal"),
+      document.querySelector("footer")
+    ].concat(Array.prototype.slice.call(document.querySelectorAll(".header-actions > a")))
+      .filter(Boolean);
+  }
+
+  function setBackgroundInert(open) {
+    backgroundEls().forEach(function (el) {
+      if (open) el.setAttribute("inert", "");
+      else el.removeAttribute("inert");
+    });
+  }
+
+  function trapFocus(e) {
+    if (!nav || !nav.classList.contains("active") || e.key !== "Tab") return;
+    var items = [btn].concat(sheetLinks()).filter(Boolean);
+    if (!items.length) return;
+    var first = items[0];
+    var last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   function setMenuOpen(open) {
     if (!nav || !btn) return;
     nav.classList.toggle("active", open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
-    btn.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+    btn.setAttribute("aria-label", open ? "Fechar seções" : "Abrir seções");
     nav.setAttribute("aria-hidden", open ? "false" : "true");
     document.body.classList.toggle("menu-open", open);
+    setBackgroundInert(open);
     if (open) {
+      lastFocus = document.activeElement;
       lockScroll();
+      var first = sheetLinks()[0];
+      if (first) first.focus();
     } else {
       unlockScroll();
+      if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
     }
   }
 
@@ -1881,19 +2010,17 @@ footer {
     setMenuOpen(false);
   }
 
-function toggleMenu() {
+  function toggleMenu() {
     setMenuOpen(!nav.classList.contains("active"));
   }
 
   if (btn) btn.addEventListener("click", toggleMenu);
-
   if (scrim) scrim.addEventListener("click", closeMenu);
 
   if (nav) {
     nav.addEventListener("click", function (e) {
       if (e.target === nav) closeMenu();
     });
-
     nav.querySelectorAll("a").forEach(function (a) {
       a.addEventListener("click", closeMenu);
     });
@@ -1901,11 +2028,44 @@ function toggleMenu() {
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") closeMenu();
+    trapFocus(e);
   });
 
   window.addEventListener("resize", function () {
     if (!window.matchMedia("(max-width: 768px)").matches) closeMenu();
   });
+
+  function setCurrentSection(id) {
+    document.querySelectorAll("[data-nav-section]").forEach(function (a) {
+      if (a.getAttribute("data-nav-section") === id) {
+        a.setAttribute("aria-current", "true");
+      } else {
+        a.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  var sectionIds = ["como", "planos", "faq"];
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(
+      function (entries) {
+        var visible = entries
+          .filter(function (e) { return e.isIntersecting; })
+          .sort(function (a, b) { return b.intersectionRatio - a.intersectionRatio; });
+        if (!visible[0]) return;
+        var top = visible[0].target;
+        if (!top.id || top.classList.contains("hero")) setCurrentSection(null);
+        else setCurrentSection(top.id);
+      },
+      { rootMargin: "-18% 0px -58% 0px", threshold: [0, 0.2, 0.45] }
+    );
+    sectionIds.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+    var hero = document.querySelector("section.hero");
+    if (hero) io.observe(hero);
+  }
 })();
 </script>
 

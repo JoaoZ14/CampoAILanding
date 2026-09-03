@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AG Assist — Carrossel Instagram · Mancha na folha</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --green-dark: #2a382a;
+    --green-mid: #3d4f3d;
+    --field: #a97440;
+    --field-dark: #8a5f36;
+    --bg: #f6f3ec;
+    --bg-white: #fdfcfa;
+    --text: #3a3a38;
+    --muted: #5c5c58;
+    --soft: rgba(169, 116, 64, 0.14);
+    --line: rgba(169, 116, 64, 0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    background: #1a1f1a;
+    color: var(--text);
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page-head {
+    max-width: 1180px;
+    margin: 0 auto 2rem;
+    color: #fdfcfa;
+  }
+
+  .page-head h1 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  .page-head p {
+    margin-top: 0.5rem;
+    color: rgba(253, 252, 250, 0.75);
+    max-width: 42rem;
+    line-height: 1.5;
+  }
+
+  .hint {
+    margin-top: 1rem;
+    padding: 0.85rem 1rem;
+    background: rgba(169, 116, 64, 0.2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #f6f3ec;
+  }
+
+  .board {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    max-width: 2400px;
+    margin: 0 auto;
+  }
+
+  /* —— Slide canvas 1080×1350 —— */
+  .slide {
+    position: relative;
+    width: 360px;
+    height: 450px;
+    font-size: 17px; /* escala preview ≈ 1/3 de 1080 */
+    overflow: hidden;
+    border-radius: 4px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    flex-shrink: 0;
+  }
+
+  /* Export: tamanho real Instagram */
+  .board.export-mode .slide {
+    width: 1080px;
+    height: 1350px;
+    font-size: 51px;
+  }
+
+  .board.export-mode .story {
+    width: 1080px;
+    height: 1920px;
+    font-size: 56px;
+  }
+
+  .slide-label {
+    position: absolute;
+    top: -1.6rem;
+    left: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(253, 252, 250, 0.55);
+  }
+
+  .wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-bar {
+    position: absolute;
+    top: 5.9%;
+    left: 5.9%;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 0.45em;
+  }
+
+  .logo-bar img {
+    height: 2.35em;
+    width: auto;
+    display: block;
+  }
+
+  .logo-bar .wordmark {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-weight: 700;
+    font-size: 1.05em;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .logo-bar--light .wordmark { color: #fdfcfa; }
+  .logo-bar--dark .wordmark { color: var(--green-dark); }
+
+  .logo-capsule {
+    display: flex;
+    align-items: center;
+    gap: 0.45em;
+    background: #fdfcfa;
+    padding: 0.45em 0.7em;
+    border-radius: 6px;
+  }
+
+  .logo-capsule .wordmark { color: var(--green-dark); }
+
+  .bg-photo {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(42, 56, 42, 0.55) 0%,
+      rgba(42, 56, 42, 0.35) 40%,
+      rgba(42, 56, 42, 0.82) 100%
+    );
+  }
+
+  .overlay-soft {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(42, 56, 42, 0.4) 0%,
+      rgba(42, 56, 42, 0.25) 45%,
+      rgba(42, 56, 42, 0.78) 100%
+    );
+  }
+
+  .content {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    padding: 18% 8% 10%;
+  }
+
+  .content--center {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .content--bottom {
+    justify-content: flex-end;
+  }
+
+  h2.slide-title {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-weight: 700;
+    font-size: 2.2em;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  .slide-body {
+    font-size: 1.15em;
+    font-weight: 500;
+    line-height: 1.35;
+    margin-top: 0.75em;
+    max-width: 16em;
+  }
+
+  .swipe {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-top: 1.5em;
+    font-size: 0.88em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(253, 252, 250, 0.9);
+  }
+
+  .swipe-dot {
+    width: 1.6em;
+    height: 1.6em;
+    border-radius: 50%;
+    background: var(--field);
+    display: grid;
+    place-items: center;
+  }
+
+  .swipe-dot svg {
+    width: 0.7em;
+    height: 0.7em;
+    fill: none;
+    stroke: #fdfcfa;
+    stroke-width: 2.5;
+  }
+
+  /* Solid backgrounds */
+  .fill-cream { background: var(--bg); }
+  .fill-white { background: var(--bg-white); }
+  .fill-green { background: var(--green-dark); }
+
+  .accent-line {
+    width: 2.5em;
+    height: 3px;
+    background: var(--field);
+    border-radius: 2px;
+    margin: 0.85em 0;
+  }
+
+  .accent-line--center { margin-left: auto; margin-right: auto; }
+
+  .num {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 2.4em;
+    font-weight: 700;
+    color: var(--field);
+    line-height: 1;
+  }
+
+  .proofs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55em;
+    margin-top: 1.1em;
+    width: 100%;
+    max-width: 16em;
+  }
+
+  .proof {
+    display: flex;
+    align-items: center;
+    gap: 0.65em;
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.75em 0.95em;
+  }
+
+  .proof-mark {
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: 50%;
+    background: var(--field);
+    flex-shrink: 0;
+  }
+
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85em;
+    margin-top: 1em;
+    width: 100%;
+  }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75em;
+  }
+
+  .step-n {
+    flex-shrink: 0;
+    width: 1.85em;
+    height: 1.85em;
+    border-radius: 6px;
+    background: var(--field);
+    color: #fdfcfa;
+    font-weight: 700;
+    font-size: 1em;
+    display: grid;
+    place-items: center;
+  }
+
+  .step p {
+    font-size: 1.05em;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+    padding-top: 0.25em;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    margin-top: 1.25em;
+    background: var(--field);
+    color: #fdfcfa;
+    font-weight: 700;
+    font-size: 1.15em;
+    padding: 0.8em 1.5em;
+    border-radius: 8px;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+
+  .disclaimer {
+    margin-top: 1em;
+    font-size: 0.72em;
+    font-weight: 500;
+    line-height: 1.35;
+    color: rgba(253, 252, 250, 0.65);
+    max-width: 22em;
+  }
+
+  .offer {
+    margin-top: 0.65em;
+    font-size: 0.92em;
+    font-weight: 500;
+    color: rgba(253, 252, 250, 0.85);
+  }
+
+  .eyebrow {
+    font-size: 0.82em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--field);
+    margin-bottom: 0.5em;
+  }
+
+  .note-sm {
+    font-size: 0.85em !important;
+    max-width: 20em;
+  }
+
+  .text-light { color: #fdfcfa; }
+  .text-dark { color: var(--text); }
+  .text-muted { color: var(--muted); }
+
+  /* Photo inset cards */
+  .photo-card {
+    position: absolute;
+    right: 8%;
+    bottom: 12%;
+    width: 42%;
+    aspect-ratio: 3/4;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid rgba(253, 252, 250, 0.35);
+    background-size: cover;
+    background-position: center;
+  }
+
+  .section-title {
+    max-width: 1180px;
+    margin: 3rem auto 1.25rem;
+    color: #fdfcfa;
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 1.35rem;
+  }
+
+  .copy-panel {
+    max-width: 720px;
+    margin: 2rem auto 0;
+    background: var(--bg-white);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 1.75rem 1.5rem;
+    line-height: 1.55;
+  }
+
+  .copy-panel h2 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 1.25rem;
+    color: var(--green-dark);
+    margin-bottom: 0.75rem;
+  }
+
+  .copy-panel h3 {
+    font-size: 0.95rem;
+    color: var(--field-dark);
+    margin: 1.35rem 0 0.4rem;
+  }
+
+  .copy-panel pre {
+    white-space: pre-wrap;
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    font-size: 0.92rem;
+    background: var(--bg);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+
+  .copy-panel ul { padding-left: 1.2rem; margin: 0.4rem 0; }
+  .copy-panel li { margin: 0.25rem 0; }
+
+  .toolbar {
+    max-width: 1180px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .toolbar button {
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.55rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--green-dark);
+    cursor: pointer;
+  }
+
+  .toolbar button.active {
+    background: var(--field);
+    color: #fff;
+    border-color: var(--field);
+  }
+
+  /* Stories 9:16 */
+  .story {
+    width: 270px;
+    height: 480px;
+    font-size: 14px;
+  }
+
+  .print-only { display: none; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page-head, .toolbar, .section-title, .copy-panel, .slide-label, .hint { display: none !important; }
+    .board { gap: 0; }
+    .slide {
+      width: 1080px !important;
+      height: 1350px !important;
+      font-size: 51px !important;
+      box-shadow: none;
+      border-radius: 0;
+      page-break-after: always;
+      break-after: page;
+    }
+    .story {
+      width: 1080px !important;
+      height: 1920px !important;
+      font-size: 56px !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <h1>AG Assist — Carrossel: mancha na folha</h1>
+  <p>7 slides 1080×1350 · problema A · identidade visual da landing. Abra no Chrome, use o botão Exportar e capture cada slide (ou imprima em PDF página a página).</p>
+  <p class="hint">Logo fixa no canto superior esquerdo em todos os slides. Fotos: Unsplash + hero local. CTA: Começar grátis.</p>
+</header>
+
+<div class="toolbar">
+  <button type="button" id="btn-preview" class="active">Preview</button>
+  <button type="button" id="btn-export">Modo exportar (1080×1350)</button>
+  <button type="button" onclick="window.print()">Imprimir / PDF</button>
+</div>
+
+<section class="board" id="board">
+
+  <!-- SLIDE 1 — GANCHO -->
+  <article class="slide" aria-label="Slide 1 — Gancho">
+    <span class="slide-label">Slide 1 · Gancho</span>
+    <div class="wrap fill-green">
+      <div class="bg-photo" style="background-image:url('assets/slide1-campo.jpg')"></div>
+      <div class="overlay"></div>
+      <div class="logo-bar">
+        <div class="logo-capsule">
+          <img src="assets/logo.png" alt="" />
+          <span class="wordmark">AG Assist</span>
+        </div>
+      </div>
+      <div class="content content--center">
+        <h2 class="slide-title text-light">Mancha na folha.<br />Técnico longe.</h2>
+        <div class="accent-line accent-line--center"></div>
+        <p class="slide-body text-light" style="margin-left:auto;margin-right:auto">Você no meio da lavoura — e a decisão não pode esperar.</p>
+        <div class="swipe">
+          <span>Deslize para o lado</span>
+          <span class="swipe-dot" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          </span>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- SLIDE 2 — AGRAVA -->
+  <article class="slide" aria-label="Slide 2 — Agrava">
+    <span class="slide-label">Slide 2 · Agrava</span>
+    <div class="wrap fill-cream">
+      <div class="logo-bar logo-bar--dark">
+        <img src="assets/logo.png" alt="" />
+        <span class="wordmark">AG Assist</span>
+      </div>
+      <div class="content" style="justify-content:center;padding-right:42%">
+        <p class="eyebrow">Se você espera</p>
+        <h2 class="slide-title text-dark">Amanhã pode ser tarde demais.</h2>
+        <div class="accent-line"></div>
+        <p class="slide-body text-muted">Chute errado, praga que espalha, custo que sobe — tudo começa com uma dúvida parada.</p>
+      </div>
+      <div class="photo-card" style="background-image:url('assets/soja.jpg'); bottom:14%; right:6%; width:38%;"></div>
+    </div>
+  </article>
+
+  <!-- SLIDE 3 — CENA -->
+  <article class="slide" aria-label="Slide 3 — Cena">
+    <span class="slide-label">Slide 3 · Cena</span>
+    <div class="wrap fill-green">
+      <div class="bg-photo" style="background-image:url('assets/campo-sol.jpg'); background-position: center 40%;"></div>
+      <div class="overlay-soft"></div>
+      <div class="logo-bar">
+        <div class="logo-capsule">
+          <img src="assets/logo.png" alt="" />
+          <span class="wordmark">AG Assist</span>
+        </div>
+      </div>
+      <div class="content content--bottom">
+        <h2 class="slide-title text-light">Sol alto. Sinal fraco. Dúvida na mão.</h2>
+        <p class="slide-body text-light">Você para na linha, olha a folha — e o técnico não chega agora.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- SLIDE 4 — VIRADA -->
+  <article class="slide" aria-label="Slide 4 — Virada">
+    <span class="slide-label">Slide 4 · Virada</span>
+    <div class="wrap fill-white">
+      <div class="logo-bar logo-bar--dark">
+        <img src="assets/logo.png" alt="" />
+        <span class="wordmark">AG Assist</span>
+      </div>
+      <div class="content content--center" style="padding-top:22%">
+        <p class="eyebrow">E se…</p>
+        <h2 class="slide-title text-dark">Tirasse a dúvida em segundos, no WhatsApp?</h2>
+        <div class="accent-line accent-line--center"></div>
+        <p class="slide-body text-muted" style="margin-left:auto;margin-right:auto">Foto da folha. Texto curto. Resposta clara — ainda no campo.</p>
+      </div>
+      <div class="photo-card" style="
+        background-image:url('assets/mockup-whatsapp.png');
+        background-color:#f6f3ec;
+        background-size:contain;
+        background-repeat:no-repeat;
+        width:36%;
+        bottom:8%;
+        right:50%;
+        transform:translateX(50%);
+        border-color: var(--line);
+      "></div>
+    </div>
+  </article>
+
+  <!-- SLIDE 5 — SOLUÇÃO -->
+  <article class="slide" aria-label="Slide 5 — Solução">
+    <span class="slide-label">Slide 5 · Solução</span>
+    <div class="wrap fill-cream">
+      <div class="logo-bar logo-bar--dark">
+        <img src="assets/logo.png" alt="" />
+        <span class="wordmark">AG Assist</span>
+      </div>
+      <div class="content" style="justify-content:center; padding-top:16%">
+        <p class="eyebrow">A solução</p>
+        <h2 class="slide-title text-dark">AG Assist</h2>
+        <p class="slide-body text-muted">Orientação prática no WhatsApp para decidir rápido na lavoura.</p>
+        <div class="proofs">
+          <div class="proof"><span class="proof-mark"></span> Manda foto, texto ou áudio</div>
+          <div class="proof"><span class="proof-mark"></span> Resposta em poucos segundos</div>
+          <div class="proof"><span class="proof-mark"></span> Apoio na decisão no campo</div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- SLIDE 6 — COMO USAR -->
+  <article class="slide" aria-label="Slide 6 — Como usar">
+    <span class="slide-label">Slide 6 · Como usar</span>
+    <div class="wrap fill-white">
+      <div class="logo-bar logo-bar--dark">
+        <img src="assets/logo.png" alt="" />
+        <span class="wordmark">AG Assist</span>
+      </div>
+      <div class="content" style="justify-content:center; padding-top:14%">
+        <p class="eyebrow">Em 3 passos</p>
+        <h2 class="slide-title text-dark">Como usar</h2>
+        <div class="accent-line"></div>
+        <div class="steps">
+          <div class="step">
+            <span class="step-n">1</span>
+            <p>Cadastre-se no site (leva poucos minutos)</p>
+          </div>
+          <div class="step">
+            <span class="step-n">2</span>
+            <p>Receba o WhatsApp e mande a foto da folha</p>
+          </div>
+          <div class="step">
+            <span class="step-n">3</span>
+            <p>Receba orientação e decida ainda no campo</p>
+          </div>
+        </div>
+        <p class="slide-body text-muted note-sm" style="margin-top:1.25em">Apoio por mensagem — não substitui visita técnica em urgência.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- SLIDE 7 — CTA -->
+  <article class="slide" aria-label="Slide 7 — CTA">
+    <span class="slide-label">Slide 7 · CTA</span>
+    <div class="wrap fill-green">
+      <div class="bg-photo" style="background-image:url('assets/hero-agro.jpg'); opacity:0.35;"></div>
+      <div class="overlay" style="background:rgba(42,56,42,0.75)"></div>
+      <div class="logo-bar">
+        <div class="logo-capsule">
+          <img src="assets/logo.png" alt="" />
+          <span class="wordmark">AG Assist</span>
+        </div>
+      </div>
+      <div class="content content--center">
+        <h2 class="slide-title text-light">Pronto para tirar a dúvida no campo?</h2>
+        <div class="accent-line accent-line--center"></div>
+        <p class="slide-body text-light" style="margin-left:auto;margin-right:auto">Mande a foto da folha agora.</p>
+        <a class="cta-btn" href="https://campoai-production-b7c7.up.railway.app/cadastro?origin=instagram" target="_blank" rel="noopener">Começar grátis</a>
+        <p class="offer">14 dias ou 10 análises grátis · a partir de R$ 29/mês</p>
+        <p class="disclaimer">AG Assist é apoio por mensagem. Não substitui receituário, laudo nem atendimento de emergência.</p>
+      </div>
+    </div>
+  </article>
+
+</section>
+
+<h2 class="section-title">Stories (3 frames · 1080×1920)</h2>
+<section class="board" id="board-stories">
+
+  <article class="slide story" aria-label="Story 1">
+    <span class="slide-label">Story 1</span>
+    <div class="wrap fill-green">
+      <div class="bg-photo" style="background-image:url('assets/stories-campo.jpg')"></div>
+      <div class="overlay"></div>
+      <div class="logo-bar">
+        <div class="logo-capsule">
+          <img src="assets/logo.png" alt="" />
+          <span class="wordmark">AG Assist</span>
+        </div>
+      </div>
+      <div class="content content--center">
+        <h2 class="slide-title text-light">Vi mancha na folha e fiquei parado.</h2>
+        <p class="slide-body text-light">Técnico longe. Decisão agora.</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="slide story" aria-label="Story 2">
+    <span class="slide-label">Story 2</span>
+    <div class="wrap fill-cream">
+      <div class="logo-bar logo-bar--dark">
+        <img src="assets/logo.png" alt="" />
+        <span class="wordmark">AG Assist</span>
+      </div>
+      <div class="content content--center">
+        <h2 class="slide-title text-dark">Manda a foto no WhatsApp.</h2>
+        <div class="accent-line accent-line--center"></div>
+        <p class="slide-body text-muted">AG Assist responde em segundos — orientação prática no campo.</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="slide story" aria-label="Story 3">
+    <span class="slide-label">Story 3</span>
+    <div class="wrap fill-green">
+      <div class="logo-bar">
+        <div class="logo-capsule">
+          <img src="assets/logo.png" alt="" />
+          <span class="wordmark">AG Assist</span>
+        </div>
+      </div>
+      <div class="content content--center">
+        <h2 class="slide-title text-light">Comece grátis hoje</h2>
+        <a class="cta-btn" href="https://campoai-production-b7c7.up.railway.app/cadastro?origin=instagram" target="_blank" rel="noopener">Criar conta</a>
+        <p class="offer">14 dias ou 10 análises · link na bio</p>
+        <p class="disclaimer">Apoio por mensagem — não substitui técnico em urgência.</p>
+      </div>
+    </div>
+  </article>
+
+</section>
+
+<article class="copy-panel">
+  <h2>Copy pronta para publicar</h2>
+
+  <h3>Legenda do carrossel</h3>
+  <pre>Mancha na folha. Técnico longe. E agora?
+
+No meio da lavoura a dúvida não espera agenda. Você precisa de orientação rápida — sem chute e sem ficar refém do grupo do WhatsApp.
+
+Com o AG Assist você manda foto, texto ou áudio e recebe resposta clara em poucos segundos, direto no WhatsApp.
+
+Cadastre-se, abra a conversa e mande a foto da folha.
+Comece grátis: 14 dias ou 10 análises.
+
+Link: https://campoai-production-b7c7.up.railway.app/cadastro?origin=instagram
+
+Apoio por mensagem. Não substitui visita técnica, receituário nem emergência.
+
+#AGAssist #Agronegocio #ProdutorRural #Lavoura #WhatsAppAgro #Soja #CampoBrasileiro #Agricultura #Manejo #DecisaoNoCampo #AgTech #OrientacaoNoCampo</pre>
+
+  <h3>3 primeiras linhas (A/B)</h3>
+  <ul>
+    <li><strong>A:</strong> Mancha na folha. Técnico longe. E agora?</li>
+    <li><strong>B:</strong> Você para na linha, olha a folha — e a dúvida não pode esperar até amanhã.</li>
+    <li><strong>C:</strong> Chute na lavoura custa caro. Manda a foto e decide no campo.</li>
+  </ul>
+
+  <h3>Alt text por slide</h3>
+  <ul>
+    <li><strong>1:</strong> Lavoura verde ao fundo com texto: Mancha na folha. Técnico longe. Logo AG Assist no canto.</li>
+    <li><strong>2:</strong> Fundo bege com aviso de que esperar pode custar a lavoura; foto de soja à direita.</li>
+    <li><strong>3:</strong> Campo ao sol com texto: Sol alto. Sinal fraco. Dúvida na mão.</li>
+    <li><strong>4:</strong> Fundo claro perguntando se dá para tirar a dúvida no WhatsApp; foto de celular.</li>
+    <li><strong>5:</strong> Apresentação do AG Assist com três benefícios: foto, resposta rápida, decisão no campo.</li>
+    <li><strong>6:</strong> Três passos numerados: cadastro, WhatsApp, orientação.</li>
+    <li><strong>7:</strong> Fundo verde escuro com botão Começar grátis e oferta de teste.</li>
+  </ul>
+
+  <h3>Direção visual (resumo)</h3>
+  <ul>
+    <li><strong>1:</strong> fundo foto campo + overlay #2a382a · logo cápsula clara · tipografia clara · “Deslize”</li>
+    <li><strong>2:</strong> fundo #f6f3ec · logo escura · foto soja inset · acento #a97440</li>
+    <li><strong>3:</strong> foto campo-sol + overlay · logo cápsula · texto na base</li>
+    <li><strong>4:</strong> fundo #fdfcfa · phone inset · virada central</li>
+    <li><strong>5:</strong> fundo #f6f3ec · cards de prova com borda terra</li>
+    <li><strong>6:</strong> fundo #fdfcfa · passos com número #a97440</li>
+    <li><strong>7:</strong> fundo #2a382a · botão #a97440 · CTA central · disclaimer</li>
+  </ul>
+
+  <h3>Spec botão slide 7</h3>
+  <ul>
+    <li>Texto: <strong>Começar grátis</strong></li>
+    <li>Fundo: #a97440 · texto: #fdfcfa · radius 8px</li>
+    <li>Posição: centro, abaixo do subtítulo</li>
+    <li>Link: cadastro?origin=instagram</li>
+  </ul>
+</article>
+
+<script>
+  const board = document.getElementById("board");
+  const boardStories = document.getElementById("board-stories");
+  const btnPreview = document.getElementById("btn-preview");
+  const btnExport = document.getElementById("btn-export");
+
+  btnPreview.addEventListener("click", () => {
+    board.classList.remove("export-mode");
+    boardStories.classList.remove("export-mode");
+    btnPreview.classList.add("active");
+    btnExport.classList.remove("active");
+  });
+
+  btnExport.addEventListener("click", () => {
+    board.classList.add("export-mode");
+    boardStories.classList.add("export-mode");
+    btnExport.classList.add("active");
+    btnPreview.classList.remove("active");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+</script>
+</body>
+</html>
