@@ -4,18 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#2a382a">
-<meta name="description" content="AG Assist: orientação prática para lavoura e rebanho pelo WhatsApp. Tire dúvidas, envie fotos e receba respostas rápidas no campo.">
+<meta name="description" content="AG Assist no WhatsApp: orientação para o campo hoje e, em implantação, registros de atividades, gastos, lembretes e histórico da propriedade.">
 
 <!-- Notícias: GET no backend (DuckDNS). Em localhost o script usa noticias.json na mesma origem. Cotações: cotacoes.json no mesmo host. -->
 <meta name="campoai-noticias-json" content="https://campoai-production-b7c7.up.railway.app/api/noticias">
 <!-- Cotações: por padrão, cotacoes.json no mesmo host -->
 <meta name="campoai-cotacoes-json" content="cotacoes.json">
 
-<title>AG Assist — orientação no WhatsApp</title>
+<title>AG Assist — seu assistente do campo no WhatsApp</title>
 
 <link rel="icon" href="assets/Logo CampoLead (1)-Photoroom.png" type="image/png">
 
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 
 <style>
 :root {
@@ -473,6 +475,46 @@ section h2 {
   margin-top: 0.85rem;
   font-size: 0.92rem;
   color: var(--text-muted);
+}
+
+.hero-stage {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--field-line);
+  border-radius: 999px;
+  color: var(--field-dark);
+  background: var(--field-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.operational-note {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-left: 0;
+  background: #fff;
+  color: var(--text-muted);
+}
+
+.example-requests {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.example-requests p {
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(42, 56, 42, 0.12);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--green-dark);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .example-requests { grid-template-columns: 1fr; }
 }
 
 /* PARA QUEM */
@@ -1512,6 +1554,8 @@ footer {
   }
 }
 </style>
+<link rel="stylesheet" href="assets/modern.css">
+<script src="assets/experience.js" defer></script>
 </head>
 
 <body>
@@ -1534,6 +1578,7 @@ footer {
     </a>
 
     <nav class="header-nav-desktop" aria-label="Seções">
+      <a href="#experiencia" data-nav-section="experiencia">Experimente</a>
       <a href="#como" data-nav-section="como">Como funciona</a>
       <a href="#planos" data-nav-section="planos">Planos</a>
       <a href="#faq" data-nav-section="faq">Perguntas</a>
@@ -1562,6 +1607,7 @@ footer {
     <div class="nav-sheet__handle" aria-hidden="true"></div>
     <p class="nav-sheet__label" id="nav-sheet-title">AG Assist</p>
     <div class="nav-sheet__links">
+      <a href="#experiencia" data-nav-section="experiencia">Experimente</a>
       <a href="#como" data-nav-section="como">Como funciona</a>
       <a href="#planos" data-nav-section="planos">Planos</a>
       <a href="#faq" data-nav-section="faq">Perguntas</a>
@@ -1575,99 +1621,113 @@ footer {
     <div class="hero-copy-wrap">
       <div class="hero-copy">
         <h1>
-          AG Assist
-          <span class="hero-h1-break">Orientação prática no campo, direto no WhatsApp</span>
+          O campo não para.<br><em>Sua gestão acompanha.</em>
         </h1>
-        <p>Tire dúvidas, envie fotos e receba respostas claras para decidir rápido na lavoura ou no rebanho.</p>
+        <p>Converse com o AG Assist pelo WhatsApp. Tire dúvidas hoje e conheça a nova fase que vai ajudar a registrar o que acontece na propriedade, sem complicar a rotina.</p>
 
         <div class="hero-buttons">
-          <a href="https://campoai-production-b7c7.up.railway.app/cadastro?origin=landing" class="btn btn-primary" aria-label="Criar conta grátis">Começar grátis</a>
-          <a href="#planos" class="btn btn-secondary">Ver planos</a>
+          <a href="https://campoai-production-b7c7.up.railway.app/cadastro?origin=landing" class="btn btn-primary" aria-label="Criar conta grátis">Começar grátis <span aria-hidden="true">↗</span></a>
+          <a href="#experiencia" class="btn btn-secondary">Conhecer a nova fase</a>
         </div>
-        <p class="hero-trial">14 dias ou 10 análises grátis · pagos a partir de R$&nbsp;29/mês.</p>
+        <p class="hero-trial">14 dias ou 10 análises de orientação grátis. <span>Funções operacionais em implantação.</span></p>
       </div>
     </div>
 
     <div class="hero-media">
       <img
-        src="assets/hero-agro.jpg"
-        alt="Lavoura verde em plantação no campo brasileiro"
-        width="1920"
-        height="1280"
+        src="assets/hero-campo-amanhecer.webp"
+        alt="Lavoura de soja ao amanhecer"
+        width="1916"
+        height="821"
         loading="eager"
         decoding="async"
       />
+    </div>
+  </div>
+  <a class="hero-scroll" href="#experiencia">Explore como funciona <span aria-hidden="true">↓</span></a>
+</section>
+
+<section id="experiencia" class="experience" aria-labelledby="experience-title">
+  <div class="container experience-layout">
+    <div class="experience-copy">
+      <h2 id="experience-title">Da conversa ao registro.</h2>
+      <p>Imagine resolver as tarefas do dia no mesmo lugar em que você já conversa. Escolha uma situação para ver como será a nova fase do AG Assist.</p>
+      <div class="experience-options" role="group" aria-label="Exemplos da nova fase">
+        <button type="button" class="experience-option is-active" data-example="plantio" aria-pressed="true"><span>Registrar plantio</span><span aria-hidden="true">↗</span></button>
+        <button type="button" class="experience-option" data-example="gasto" aria-pressed="false"><span>Anotar um gasto</span><span aria-hidden="true">↗</span></button>
+        <button type="button" class="experience-option" data-example="historico" aria-pressed="false"><span>Consultar o histórico</span><span aria-hidden="true">↗</span></button>
+        <button type="button" class="experience-option" data-example="lembrete" aria-pressed="false"><span>Criar um lembrete</span><span aria-hidden="true">↗</span></button>
+      </div>
+      <p class="experience-disclaimer">Prévia ilustrativa. As funções de registro e lembrete ainda estão em implantação.</p>
+    </div>
+    <div class="experience-stage">
+      <div class="conversation" aria-label="Prévia ilustrativa de conversa com o AG Assist" aria-live="polite">
+        <div class="conversation__user">
+          <span class="conversation__label">Você diz</span>
+          <p id="example-user">Plantei milho no Talhão Norte hoje.</p>
+        </div>
+        <div class="conversation__answer">
+          <span class="conversation__avatar" aria-hidden="true">AG</span>
+          <div>
+            <span class="conversation__label">AG Assist responde</span>
+            <p id="example-answer">Entendi: plantio de milho no Talhão Norte hoje. Vou vincular o registro à propriedade e à safra correspondente.</p>
+            <span class="conversation__receipt" id="example-receipt">Registro ilustrativo · Talhão Norte</span>
+          </div>
+        </div>
+      </div>
+      <span class="experience-stage__tag">Simples como contar o que aconteceu.</span>
     </div>
   </div>
 </section>
 
 <section class="bg-light">
   <div class="container">
-    <h2>Para quem é</h2>
+    <h2>Feito para quem está no campo.</h2>
     <div class="grid-audiencia">
       <div class="block">
-        <h3>Produtor rural</h3>
-        <p>Decisões rápidas no dia a dia da lavoura</p>
+        <h3>Quem produz</h3>
+        <p>Uma forma simples de guardar o que foi feito em cada talhão e safra.</p>
       </div>
       <div class="block">
-        <h3>Pecuarista</h3>
-        <p>Apoio prático no manejo do rebanho</p>
+        <h3>Quem cuida do rebanho</h3>
+        <p>Informações e ocorrências do manejo mais fáceis de encontrar.</p>
       </div>
       <div class="block">
-        <h3>Profissionais do agro</h3>
-        <p>Segunda leitura e agilidade no atendimento — sem substituir sua responsabilidade técnica</p>
+        <h3>Quem orienta</h3>
+        <p>Mais contexto para o atendimento, com a decisão técnica sempre nas mãos do profissional.</p>
       </div>
     </div>
   </div>
 </section>
 
 <section id="como" class="como">
-  <div class="como-shell">
-    <div class="como-media">
-      <img
-        src="assets/como-mockup-ag-assist.png"
-        alt="Conversa com o AG Assist no WhatsApp no celular"
-        loading="lazy"
-      />
-    </div>
-    <div class="como-steps-side">
-      <div class="como-copy">
-        <h2>Como funciona</h2>
-        <div class="steps">
-          <div class="step">
-            <div class="step-number">1</div>
-            <p>Cadastre-se no site (leva poucos minutos)</p>
-          </div>
-          <div class="step">
-            <div class="step-number">2</div>
-            <p>Receba boas-vindas no WhatsApp e mande foto ou texto</p>
-          </div>
-          <div class="step">
-            <div class="step-number">3</div>
-            <p>Receba orientação em poucos segundos</p>
-          </div>
-        </div>
-      </div>
+  <div class="container">
+    <h2>O WhatsApp que você conhece.<br>Uma rotina mais clara.</h2>
+    <div class="how-grid">
+      <div><span class="how-line" aria-hidden="true"></span><h3>Entre</h3><p>Crie sua conta e receba as boas-vindas no WhatsApp.</p></div>
+      <div><span class="how-line" aria-hidden="true"></span><h3>Converse</h3><p>Envie perguntas por texto, foto ou áudio. A orientação já está disponível.</p></div>
+      <div><span class="how-line" aria-hidden="true"></span><h3>Acompanhe</h3><p>Na nova fase, registre o trabalho e consulte informações da propriedade pela conversa.</p></div>
     </div>
   </div>
 </section>
 
-<section class="bg-light">
+<section class="benefits-section">
   <div class="container">
-    <h2>Benefícios</h2>
+    <h2>Mais tempo no campo.<br>Menos informação perdida.</h2>
     <div class="benefits">
       <div>
-        <p>Respostas simples e diretas</p>
-        <p>Disponível a qualquer hora</p>
-        <p>Ajuda na decisão no campo</p>
+        <p>Respostas simples e diretas para dúvidas do campo</p>
+        <p>Registro de plantio, operações e gastos por propriedade</p>
+        <p>Consulta de talhões, safras e atividades anteriores</p>
         <p>Apoio a <strong>cálculos práticos</strong> (doses, áreas, conversões) com base no que você informar</p>
       </div>
       <div>
-        <p>Envio de fotos para análise</p>
-        <p>Economia de tempo</p>
+        <p>Envio de fotos e áudios para análise</p>
+        <p>Lembretes e acompanhamento de tarefas</p>
         <p><strong>Não substitui profissional em urgência</strong></p>
       </div>
     </div>
+    <p class="operational-note">Registros, histórico e lembretes fazem parte da nova fase operacional em implantação. A disponibilidade depende da ativação das funções no serviço.</p>
   </div>
 </section>
 
@@ -1743,7 +1803,7 @@ footer {
         </svg>
       </span>
       <p class="plans-footnote__text">
-        Limites e condições dos planos pagos estão na
+        As funções operacionais estão em implantação e ainda não são uma promessa de disponibilidade em nenhum plano. Limites e condições dos planos pagos estão na
         <a href="https://campoai-production-b7c7.up.railway.app/planos" class="plans-footnote__link" target="_blank" rel="noopener noreferrer" aria-label="Página de planos (abre em nova aba)">página de planos</a>.
       </p>
     </div>
@@ -1755,6 +1815,11 @@ footer {
     <h2>Perguntas frequentes</h2>
 
     <div class="faq">
+      <details>
+        <summary>Já posso registrar atividades e gastos pelo WhatsApp?</summary>
+        <p>Essas funções fazem parte da nova fase operacional do AG Assist e ainda estão em implantação. Até sua ativação no serviço, o atendimento disponível continua sendo o de orientação por mensagem. Esta página será atualizada quando o acesso operacional estiver liberado.</p>
+      </details>
+
       <details>
         <summary>Funciona offline?</summary>
         <p>Não. O AG Assist é atendido pelo <strong>WhatsApp</strong>, que depende de <strong>internet</strong> no celular (dados móveis ou Wi‑Fi) para enviar e receber mensagens, fotos e áudios. Sem conexão, o próprio WhatsApp não entrega nem sincroniza as conversas — não é limitação do serviço, e sim do funcionamento do app.</p>
@@ -1782,7 +1847,7 @@ footer {
 
       <details>
         <summary>O que muda entre gratuito e os planos pagos?</summary>
-        <p>Os <strong>mesmos tipos</strong> de atendimento (texto, fotos, áudios e nível de detalhe nas respostas). O gratuito basta para começar pelo WhatsApp; Pessoal e Empresa trazem cadastro e condições comerciais — detalhes na <strong>seção Planos</strong> e na página de assinatura.</p>
+        <p>Hoje, os planos oferecem os <strong>mesmos tipos de orientação</strong> por texto, fotos e áudios. O gratuito permite começar pelo WhatsApp; Pessoal e Empresa têm condições comerciais próprias, descritas na <strong>seção Planos</strong> e na página de assinatura. A nova fase operacional ainda está em implantação.</p>
       </details>
 
       <details>
@@ -1809,8 +1874,8 @@ footer {
 </section>
 
 <section class="cta-close container" aria-labelledby="cta-close-titulo">
-  <h2 id="cta-close-titulo">Pronto para tirar a dúvida no campo?</h2>
-  <p>Abra o WhatsApp, descreva a situação ou envie uma foto e receba orientação em segundos.</p>
+  <h2 id="cta-close-titulo">Comece a conversar com o AG Assist</h2>
+  <p>Cadastre-se para usar a orientação pelo WhatsApp. A rotina operacional da propriedade está em implantação.</p>
   <div class="hero-buttons">
     <a href="https://campoai-production-b7c7.up.railway.app/cadastro?origin=landing" class="btn btn-primary" aria-label="Criar conta grátis">Começar grátis</a>
     <a href="#planos" class="btn btn-secondary">Ver planos</a>
@@ -1820,7 +1885,7 @@ footer {
 <section id="cotacoes" class="bg-light" aria-labelledby="cotacoes-titulo">
   <div class="container">
     <h2 id="cotacoes-titulo">Cotações</h2>
-    <p class="section-lede">Referência rápida de mercado — recurso extra, fora do fluxo principal do AG Assist.</p>
+    <p class="section-lede">Dados de mercado com data e fonte. Confira a atualização antes de usar uma cotação.</p>
 
     <p id="cotacoes-status" class="noticias-status" role="status">Carregando cotações…</p>
 
@@ -1893,6 +1958,7 @@ footer {
       <div class="footer-col">
         <h3>Links úteis</h3>
         <ul>
+          <li><a href="#experiencia">Experimente</a></li>
           <li><a href="#como">Como funciona</a></li>
           <li><a href="#planos">Planos</a></li>
           <li><a href="#faq">Perguntas</a></li>
@@ -2045,7 +2111,7 @@ footer {
     });
   }
 
-  var sectionIds = ["como", "planos", "faq"];
+  var sectionIds = ["experiencia", "como", "planos", "faq"];
   if ("IntersectionObserver" in window) {
     var io = new IntersectionObserver(
       function (entries) {
@@ -2209,9 +2275,12 @@ footer {
       var dateStr = formatDate(item.date);
       var price = formatMoney(item.price, item.currency || "BRL");
       var priceUnavailable = !price;
+      var recordTime = item.date ? new Date(item.date).getTime() : NaN;
+      var isHistorical = isFinite(recordTime) && Date.now() - recordTime > 3 * 24 * 60 * 60 * 1000;
 
       var pills = (uf ? '<span class="quote-pill" aria-label="UF">' + uf + "</span>" : "") +
-                  (source ? '<span class="quote-pill" aria-label="Fonte">' + source + "</span>" : "");
+                  (source ? '<span class="quote-pill" aria-label="Fonte">' + source + "</span>" : "") +
+                  (isHistorical ? '<span class="quote-pill" aria-label="Cotação histórica">Histórico</span>' : '');
 
       var meta = [];
       if (dateStr) meta.push("Data: " + escapeHtml(dateStr));
@@ -2261,7 +2330,7 @@ footer {
     if (updatedEl) {
       if (res.fetchedAt) {
         var updated = formatDate(res.fetchedAt);
-        updatedEl.textContent = updated ? ("Atualizado em " + updated + ".") : "Atualizado recentemente.";
+        updatedEl.textContent = updated ? ("Arquivo recebido em " + updated + ". Veja a data de cada cotação; valores antigos são marcados como históricos.") : "Confira a data de cada cotação.";
         updatedEl.hidden = false;
       } else if (usingFallback) {
         updatedEl.textContent = "Valores indisponíveis no momento. Mostrando produtos de referência sem cotação.";
