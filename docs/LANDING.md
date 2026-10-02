@@ -1,6 +1,6 @@
-# Landing AG Assist
+# Landing AGGI
 
-A página apresenta o AG Assist como o sistema de controle e a Lida como sua assistente no WhatsApp. As atividades são mostradas como disponíveis, conforme confirmação de ativação em produção.
+A página apresenta o AGGI como o sistema de controle e a Lida como sua assistente no WhatsApp. As atividades são mostradas como disponíveis, conforme confirmação de ativação em produção.
 
 ## Conteúdo e interação
 
