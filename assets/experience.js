@@ -158,12 +158,12 @@
       setText('copy-status', 'A cópia automática não está disponível. A mensagem foi selecionada para você copiar.');
     }
   });
-  // Snapshot checked against the public catalog on 2026-10-01; refreshed lazily below.
+  // Offer 2026-10; requires migration_025 in the backend; refreshed lazily below.
   const fallbackPlans = [
-    { code: 'lite', name: 'Essencial', priceBrl: 29, customerSegment: 'personal', seats: 1, highlight: false, bullets: ['Até 35 análises por mês'] },
-    { code: 'basic', name: 'Starter', priceBrl: 49, customerSegment: 'personal', seats: 1, highlight: true, bullets: ['Análises ilimitadas (uso justo)'] },
-    { code: 'premium', name: 'Team', priceBrl: 119, customerSegment: 'personal', seats: 3, highlight: false, bullets: [] },
-    { code: 'premium', name: 'Business', priceBrl: 199, customerSegment: 'company', seats: 5, highlight: true, bullets: [] }
+    { code: 'lite', name: 'Essencial', priceBrl: 39, customerSegment: 'personal', seats: 1, highlight: false, bullets: ['Até 40 análises de IA por mês'] },
+    { code: 'basic', name: 'Starter', priceBrl: 79, customerSegment: 'personal', seats: 1, highlight: true, bullets: ['Até 100 análises de IA por mês'] },
+    { code: 'premium', name: 'Team', priceBrl: 179, customerSegment: 'personal', seats: 3, highlight: false, bullets: ['Até 250 análises de IA por mês'] },
+    { code: 'premium', name: 'Business', priceBrl: 299, customerSegment: 'company', seats: 5, highlight: true, bullets: ['Até 400 análises de IA por mês'] }
   ];
   const presentations = {
     lite: { tag: 'PARA COMEÇAR', description: 'Para usar no seu ritmo, com um limite mensal definido.' },
@@ -174,7 +174,7 @@
   const grid = document.getElementById('plans-grid');
   const segments = [...document.querySelectorAll('[data-plan-segment]')];
   const checkoutUrl = 'https://app.useaggi.com/planos';
-  const paymentNote = 'A contratação e as opções de pagamento ficam na página de planos. Confira ali os limites e condições finais, incluindo a política de uso justo.';
+  const paymentNote = 'A contratação e as opções de pagamento ficam na página de planos. Confira ali os limites e condições finais, As franquias renovam todo mês, inclusive no anual, sem acumular. Não há cobrança automática de excedente.';
   let plans = fallbackPlans;
   let segment = 'personal';
   let catalogUnavailable = false;
@@ -196,7 +196,7 @@
       const analysisBullet = plan.bullets.find((bullet) => /análises/i.test(bullet));
       const limit = analysisBullet?.match(/até\s+(\d+)\s+análises/i);
       const bullets = [];
-      if (limit) bullets.push(`Até ${limit[1]} análises por mês`);
+      if (limit) bullets.push(`Até ${limit[1]} análises de IA por mês${plan.seats > 1 ? ", divididas entre os números" : ""}`);
       else if (analysisBullet && /ilimitad/i.test(analysisBullet)) bullets.push('Análises ilimitadas, com uso justo');
       bullets.push(plan.seats === 1 ? '1 número de WhatsApp' : `Até ${plan.seats} números de WhatsApp`);
       if (segment === 'company') bullets.push('Cadastro e contratação com CNPJ');

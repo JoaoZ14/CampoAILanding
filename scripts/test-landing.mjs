@@ -15,10 +15,10 @@ const base = `http://127.0.0.1:${server.address().port}/`;
 const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 'chrome', headless: true });
 const catalog = {
   ok: true, currency: 'BRL', plans: [
-    { code: 'lite', name: 'Essencial', priceBrl: 29, period: 'mês', customerSegment: 'personal', seats: 1, highlight: false, bullets: ['Até 35 análises com IA por mês'] },
-    { code: 'basic', name: 'Starter', priceBrl: 49, period: 'mês', customerSegment: 'personal', seats: 1, highlight: true, bullets: ['Um número de WhatsApp com análises ilimitadas (uso justo)'] },
-    { code: 'premium', name: 'Team', priceBrl: 119, period: 'mês', customerSegment: 'personal', seats: 3, highlight: false, bullets: ['Até 3 números de WhatsApp no mesmo plano'] },
-    { code: 'premium', name: 'Business', priceBrl: 199, period: 'mês', customerSegment: 'company', seats: 5, highlight: true, bullets: ['Até 5 números de WhatsApp no mesmo plano'] }
+    { code: 'lite', name: 'Essencial', priceBrl: 39, period: 'mês', customerSegment: 'personal', seats: 1, highlight: false, bullets: ['Até 40 análises de IA por mês'] },
+    { code: 'basic', name: 'Starter', priceBrl: 79, period: 'mês', customerSegment: 'personal', seats: 1, highlight: true, bullets: ['Até 100 análises de IA por mês'] },
+    { code: 'premium', name: 'Team', priceBrl: 179, period: 'mês', customerSegment: 'personal', seats: 3, highlight: false, bullets: ['Até 3 números de WhatsApp no mesmo plano', 'Até 250 análises de IA por mês, compartilhadas entre os números'] },
+    { code: 'premium', name: 'Business', priceBrl: 299, period: 'mês', customerSegment: 'company', seats: 5, highlight: true, bullets: ['Até 5 números de WhatsApp no mesmo plano', 'Até 400 análises de IA por mês, compartilhadas entre os números'] }
   ]
 };
 const news = { fetchedAt: new Date().toISOString(), items: Array.from({ length: 6 }, (_, index) => ({ title: 'Notícia de teste ' + (index + 1), url: 'https://www.embrapa.br/', source: 'Embrapa', publishedAt: '2026-10-01', image: '' })) };
@@ -111,11 +111,11 @@ try {
   await page.locator('#planos').scrollIntoViewIfNeeded();
   await page.waitForFunction(() => document.querySelector('#plans-grid').dataset.segment === 'personal');
   check(await page.locator('#plans-grid .plan').count() === 3, 'Three personal plans');
-  check((await text(page, '#plans-grid')).includes('35 análises'), 'Current analysis cap');
+  check((await text(page, '#plans-grid')).includes('40 análises'), 'Current analysis cap');
   await page.locator('[data-plan-segment="company"]').click();
   check(await page.locator('#plans-grid .plan').count() === 1, 'One company plan');
   check((await text(page, '#plans-grid')).includes('Business'), 'Business plan');
-  check(await text(page, '#plans-grid .price strong') === '199', 'Business price');
+  check(await text(page, '#plans-grid .price strong') === '299', 'Business price');
   check((await text(page, '#plans-grid')).includes('Até 5 números'), 'Company seat maximum');
   await page.locator('[data-plan-segment="personal"]').click();
   check(await page.locator('#plans-grid .plan').count() === 3, 'Switch back to personal');
@@ -195,7 +195,7 @@ try {
   await failure.page.locator('[data-plan-segment="company"]').click();
   await failure.page.waitForFunction(() => document.querySelector('#plans-note').textContent.includes('Não foi possível atualizar'));
   check((await text(failure.page, '#plans-grid')).includes('Business'), 'Catalog failure preserves correct company segment');
-  check(await text(failure.page, '#plans-grid .price strong') === '199', 'Catalog failure uses verified snapshot');
+  check(await text(failure.page, '#plans-grid .price strong') === '299', 'Catalog failure uses verified snapshot');
   await failure.page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined }));
   await failure.page.locator('#copy-first-message').click();
   check((await text(failure.page, '#copy-first-message')).includes('Selecione'), 'Clipboard fallback does not falsely confirm');
