@@ -191,6 +191,18 @@ header { position: sticky; top: 0; z-index: 30; background: rgb(248 249 243 / 95
 .example-confirmation { display: flex; align-items: center; gap: 9px; border-top: 1px solid #e5ecdd; padding-top: 18px; font-size: .67rem; color: #547742; }
 .example-confirmation .icon { font-size: 16px; }
 .demo-note { font-size: .67rem; color: var(--muted); margin-top: 17px; }
+.capabilities-section { background: var(--white); }
+.capabilities-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.capability { display: flex; flex-direction: column; padding: 28px; border: 1px solid var(--line); border-radius: 18px; background: #fafbf7; }
+.capability-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; background: var(--soft); color: #52773c; margin-bottom: 24px; }
+.capability h3 { color: var(--ink); font-size: 1.06rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.4; margin-bottom: 12px; }
+.capability > p { color: #5b6d5c; font-size: .94rem; line-height: 1.75; padding-bottom: 24px; }
+.capability blockquote { margin-top: auto; border-top: 1px solid var(--line); padding-top: 18px; color: var(--ink); font-size: .88rem; line-height: 1.7; }
+.record-note { display: flex; align-items: center; gap: 18px; border-top: 1px solid var(--line); margin-top: 30px; padding-top: 25px; }
+.record-note > .icon { color: #668d3f; }
+.record-note p { flex: 1; color: var(--muted); font-size: .9rem; line-height: 1.7; }
+.record-note strong { color: var(--ink); }
+.record-note .text-link { flex: none; }
 .changed { animation: content-in .25s ease both; }
 @keyframes content-in { from { opacity: .5; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 
@@ -302,8 +314,8 @@ header { position: sticky; top: 0; z-index: 30; background: rgb(248 249 243 / 95
 .closing-layout .btn:hover { background: #2b553d; }
 .closing-layout small { display: block; margin-top: 16px; color: #60744e; font-size: .66rem; }
 .closing-signature { position: relative; font-family: 'DM Serif Display', Georgia, serif; justify-self: center; color: #718c42; line-height: .8; }
-.closing-signature > span { font-size: 9.5rem; letter-spacing: -.07em; }
-.closing-signature > p { font-family: 'DM Serif Display', Georgia, serif; font-size: 3.4rem; color: inherit; text-align: right; line-height: 1; }
+.closing-signature > img { width: 240px; }
+.closing-signature > p { font-family: 'DM Serif Display', Georgia, serif; font-size: 2rem; color: inherit; text-align: right; line-height: 1.15; margin-top: 24px; }
 .closing-signature .icon { position: absolute; font-size: 85px; top: -55px; right: -10px; font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48; }
 
 section.resources-section { padding-block: 65px; }
@@ -395,6 +407,11 @@ footer { background: #e9efdf; border-top: 1px solid #d8e1cc; padding-block: 50px
   .faq-layout { gap: 50px; }
 }
 @media (max-width: 850px) {
+  .capabilities-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .capability { padding: 24px; }
+  .record-note { flex-wrap: wrap; }
+  .record-note p { flex-basis: calc(100% - 44px); }
+  .record-note .text-link { margin-left: 40px; }
   .hero-inner { display: block; padding-block: 70px 55px; }
   .hero { min-height: 0; }
   .hero h1 { font-size: clamp(2.7rem, 6vw, 4.5rem); }
@@ -420,11 +437,19 @@ footer { background: #e9efdf; border-top: 1px solid #d8e1cc; padding-block: 50px
   .plan-description { min-height: 90px; }
   .faq-layout { grid-template-columns: .65fr 1fr; gap: 35px; }
   .closing-layout { gap: 30px; }
-  .closing-signature > span { font-size: 7rem; }
-  .closing-signature > p { font-size: 2.4rem; }
+  .closing-signature > img { width: 180px; }
+  .closing-signature > p { font-size: 1.7rem; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
 }
 @media (max-width: 620px) {
+  .capabilities-grid { grid-template-columns: 1fr; gap: 14px; }
+  .capability { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 0 16px; padding: 24px; }
+  .capability-icon { grid-column: 1; grid-row: 1; margin-bottom: 0; }
+  .capability h3 { grid-column: 2; align-self: center; margin-bottom: 0; }
+  .capability > p { grid-column: 1 / -1; margin-top: 18px; padding-bottom: 18px; }
+  .capability blockquote { grid-column: 1 / -1; }
+  .record-note { align-items: start; }
+  .record-note > .icon { margin-top: 4px; }
   html { scroll-padding-top: 85px; }
   .container { padding-inline: 22px; }
   .header-inner { padding-inline: 18px; gap: 12px; }

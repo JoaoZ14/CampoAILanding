@@ -11,7 +11,7 @@
     },
     agenda: {
       user: '“Lida, agende a revisão da bomba para amanhã às 9h.”',
-      answer: 'A tarefa fica na agenda, com o dia e o horário informados. Se faltar algum detalhe, a Lida pergunta antes de concluir.',
+      answer: 'A tarefa fica na agenda com dia e horário. A Lida confirma a data completa. Para receber uma mensagem no WhatsApp, peça também um lembrete e confira a confirmação.',
       correction: 'Mudou o plano? Peça: “Mude a revisão da bomba para amanhã às 11h.”',
       icon: 'calendar_today', title: 'Revisar a bomba', value: 'Amanhã, às 9h',
       fields: [['Tipo', 'Tarefa'], ['Situação', 'Pendente'], ['Propriedade', 'Sítio Boa Vista']],
@@ -66,11 +66,11 @@
       limit: 'A ordenha parcial e o total do dia não são somados em duplicidade. Pesagens comparáveis ajudam a acompanhar o ganho de peso por animal.'
     },
     equinos: {
-      kicker: 'CAVALOS E CENTROS DE TREINAMENTO', title: 'A rotina de cada cavalo, à mão.',
-      description: 'Monte a ficha de cada cavalo e acompanhe cuidados, alimentação e treinos. A memória do CT deixa de depender de mensagens espalhadas.',
-      features: ['Treinos com duração e observações por cavalo', 'Passadas com tempo em segundos e penalidades separadas', 'Cuidados, alimentação, agenda e serviços prestados'],
-      message: '“Registre 30 minutos de treino da Estrela hoje, com foco em condicionamento.”',
-      limit: 'Os tempos e observações compõem seu histórico de treino. Não geram classificação oficial de provas nem prescrição veterinária.'
+      kicker: 'CRIAÇÃO DE EQUINOS', title: 'Os cuidados de cada animal, à mão.',
+      description: 'Monte a ficha de cada animal e acompanhe alimentação, pesagens, cuidados e reprodução. Os registros ficam juntos para facilitar a rotina da criação.',
+      features: ['Identificação, localização e histórico por animal', 'Alimentação em kg, pesagens e cuidados realizados', 'Agenda de manejo e despesas vinculadas ao animal'],
+      message: '“Registre que a Estrela consumiu 3 kg de ração hoje.”',
+      limit: 'Acompanhe o que foi informado sobre cada animal. Orientações de saúde não substituem a avaliação de um veterinário.'
     },
     criacoes: {
       kicker: 'AVES, SUÍNOS, OVINOS E CAPRINOS', title: 'Organize os cuidados da criação.',
@@ -173,7 +173,7 @@
   };
   const grid = document.getElementById('plans-grid');
   const segments = [...document.querySelectorAll('[data-plan-segment]')];
-  const checkoutUrl = 'https://campoai-production-b7c7.up.railway.app/planos';
+  const checkoutUrl = 'https://app.useaggi.com/planos';
   const paymentNote = 'A contratação e as opções de pagamento ficam na página de planos. Confira ali os limites e condições finais, incluindo a política de uso justo.';
   let plans = fallbackPlans;
   let segment = 'personal';

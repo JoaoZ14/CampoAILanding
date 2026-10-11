@@ -33,6 +33,7 @@ async function pageFor(width, height = 900, payload = catalog, reducedMotion = '
   const context = await browser.newContext({ viewport: { width, height }, reducedMotion });
   await context.route('**/api/plans', (route) => route.fulfill({ status: payload === null ? 503 : 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(payload || {}) }));
   await context.route('**/noticias.json', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify(news) }));
+  await context.route('**/api/noticias', (route) => route.fulfill({ contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(news) }));
   // No registrations, WhatsApp sends or payments. Clipboard is scoped to this test.
   await context.addInitScript(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (value) => { window.__copied = value; } } }));
   const page = await context.newPage();
@@ -48,13 +49,22 @@ async function pageFor(width, height = 900, payload = catalog, reducedMotion = '
 try {
   const { context, page, errors, failedLocal } = await pageFor(1440);
   check(await page.locator('h1').count() === 1, 'One main heading');
+  check(await page.locator('link[rel="canonical"]').getAttribute('href') === 'https://useaggi.com/', 'Landing canonical uses the main domain');
+  check(await page.locator('.header-login').getAttribute('href') === 'https://app.useaggi.com/', 'Login opens the app subdomain root');
+  check(await page.locator('.header-cta').getAttribute('href') === 'https://app.useaggi.com/cadastro?origin=landing', 'Signup opens the React flow on the app subdomain');
+  check(await page.locator('meta[name="agassist-plans-json"]').getAttribute('content') === 'https://app.useaggi.com/api/plans', 'Catalog uses the app API');
   check((await text(page, 'body')).includes('Lida, no WhatsApp'), 'Clear product roles');
   const invalidLinks = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].filter((link) => !document.getElementById(link.getAttribute('href').slice(1))).map((link) => link.getAttribute('href')));
   check(invalidLinks.length === 0, `Valid internal anchors: ${invalidLinks}`);
   check(await page.locator('img[fetchpriority="high"]').evaluate((img) => img.complete && img.naturalWidth > 0), 'Hero image loaded');
   await noOverflow(page, 'Desktop');
   await page.screenshot({ path: resolve(artifacts, 'desktop-hero.png') });
+  await page.locator('.header-nav-desktop a[href="#recursos"]').click();
+  check(new URL(page.url()).hash === '#recursos', 'Feature overview is reachable from desktop navigation');
+  await noOverflow(page, 'Desktop capabilities');
+  await page.locator('#recursos').screenshot({ path: resolve(artifacts, 'desktop-capabilities.png') });
   const resultTitles = { gasto: 'Diesel', agenda: 'Revisar a bomba', producao: 'Colheita de cebolinha', estoque: 'Ração Crescimento', historico: 'Despesas de diesel', duvida: 'Apoio para sua observação' };
+  check(await page.locator('#plans-grid a').evaluateAll(links => links.length > 0 && links.every(link => link.href === 'https://app.useaggi.com/planos')), 'Dynamically rendered plan links use the new domain');
   for (const [key, title] of Object.entries(resultTitles)) {
     await page.locator(`[data-example="${key}"]`).click();
     check(await text(page, '#example-result-title') === title, `${key} example shows its result`);
@@ -76,7 +86,7 @@ try {
     check(await page.locator('#activity-features li').count() === 3, `${key}: activity features`);
   }
   await page.locator('[data-activity="equinos"]').click();
-  check((await text(page, '#activity-features')).includes('segundos'), 'Equine times use seconds');
+  check((await text(page, '#activity-features')).includes('Alimentação em kg'), 'Equine animal care uses declared units');
   await page.locator('#atividades').screenshot({ path: resolve(artifacts, 'desktop-activities.png') });
   await page.locator('#copy-first-message').click();
   check(await page.evaluate(() => window.__copied) === 'Oi, Lida! Quero começar a organizar minha propriedade.', 'Copy first message');
@@ -94,9 +104,10 @@ try {
   check(await page.locator('#plans-grid .plan').count() === 3, 'Switch back to personal');
   await page.locator('#planos').screenshot({ path: resolve(artifacts, 'desktop-plans.png') });
   const signupLinks = await page.locator('a[href*="/cadastro"]').evaluateAll((links) => links.map((link) => link.href));
-  check(signupLinks.every((href) => href.startsWith('https://campoai-production-b7c7.up.railway.app/cadastro')), 'Signup CTAs point to live signup');
+  check(signupLinks.length > 0 && signupLinks.every((href) => href.startsWith('https://app.useaggi.com/cadastro')), 'Signup CTAs point to the app signup');
   await page.locator('.faq summary').first().click();
   check(await page.locator('.faq details').first().getAttribute('open') !== null, 'FAQ expands');
+  await page.locator('#faq').screenshot({ path: resolve(artifacts, 'desktop-faq.png') });
   await page.locator('footer a[href="#cotacoes"]').click();
   check(await page.locator('#cotacoes').evaluate((node) => node.open), 'Quote anchor opens section');
   await page.locator('footer a[href="#noticias"]').click();
@@ -117,6 +128,9 @@ try {
     const { context, page, errors } = await pageFor(width, width === 768 ? 1024 : 844);
     await noOverflow(page, `${width}px hero`);
     await page.screenshot({ path: resolve(artifacts, `${width}-hero.png`) });
+    await page.locator('#recursos').scrollIntoViewIfNeeded();
+    await noOverflow(page, `${width}px capabilities`);
+    if (width === 390) await page.locator('#recursos').screenshot({ path: resolve(artifacts, 'mobile-capabilities.png') });
     await page.locator('[data-example="producao"]').click();
     await noOverflow(page, `${width}px examples`);
     check(await text(page, '#example-value') === '20 maços', `${width}px interactive example`);
@@ -137,6 +151,10 @@ try {
     check(await page.locator('#menu-toggle').getAttribute('aria-expanded') === 'false', `${width}px Escape closes menu`);
     check(!await page.locator('main').evaluate((node) => node.inert), `${width}px background restored`);
     await page.locator('#menu-toggle').click();
+    await page.locator('#menu a[href="#recursos"]').click();
+    check(await page.locator('#menu-toggle').getAttribute('aria-expanded') === 'false', `${width}px feature navigation closes the menu`);
+    check(await page.locator('#recursos').evaluate((node) => node === document.activeElement), `${width}px feature navigation places focus in the section`);
+    await page.locator('#menu-toggle').click();
     await page.locator('#menu a[href="#planos"]').click();
     check(await page.locator('#menu-toggle').getAttribute('aria-expanded') === 'false', `${width}px menu anchor closes menu`);
     await page.locator('[data-plan-segment="company"]').click();
@@ -145,6 +163,9 @@ try {
     await page.locator('[data-plan-segment="personal"]').click();
     await noOverflow(page, `${width}px personal plans`);
     if (width === 390) await page.locator('#planos').screenshot({ path: resolve(artifacts, 'mobile-plans.png') });
+    await page.locator('#faq').scrollIntoViewIfNeeded();
+    await noOverflow(page, `${width}px FAQ`);
+    if (width === 390) await page.locator('#faq').screenshot({ path: resolve(artifacts, 'mobile-faq.png') });
     await page.locator('footer').scrollIntoViewIfNeeded();
     await noOverflow(page, `${width}px footer`);
     if (width === 390) await page.locator('footer').screenshot({ path: resolve(artifacts, 'mobile-footer.png') });

@@ -82,7 +82,7 @@
         else link.removeAttribute('aria-current');
       });
     }, { rootMargin: '-20% 0px -60% 0px' });
-    ['experiencia', 'atividades', 'como', 'planos'].forEach((id) => {
+    ['recursos', 'experiencia', 'atividades', 'como', 'planos'].forEach((id) => {
       const section = document.getElementById(id);
       if (section) observer.observe(section);
     });
