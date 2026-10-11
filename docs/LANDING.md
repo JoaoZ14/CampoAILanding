@@ -14,6 +14,12 @@ A página apresenta o AGGI como o sistema de controle e a Lida como sua assisten
 - Teste gratuito separado dos planos, perguntas frequentes e contato legível.
 - Cotações e notícias preservadas como conteúdo opcional, em seções expansíveis.
 
+### Notícias
+
+As notícias são buscadas somente quando a seção é aberta, inclusive na prévia local. A URL principal está no meta campoai-noticias-json. O meta campoai-noticias-fallback aponta temporariamente para o endpoint público do Railway; em 11/10/2026, o novo subdomínio app.useaggi.com ainda não resolvia no DNS, enquanto o Railway retornava o arquivo atual com 60 notícias. Remova a alternativa quando o novo domínio estiver configurado e validado.
+
+Cada consulta tem prazo de quatro segundos. Se o endpoint principal falhar, a página tenta o alternativo. Ela mostra a data de atualização do feed, oferece um botão Atualizar e identifica quando usa notícias salvas. O cache do navegador expira em sete dias a partir da atualização do feed; gravá-lo novamente não renova a idade dos artigos. Sem artigos ou com todas as fontes indisponíveis, a página explica a situação e mostra links dos portais, sem apresentá-los como notícias novas. O antigo noticias.json não é usado automaticamente na prévia com os metas configurados.
+
 O conteúdo diferencia uma conversa de um registro confirmado, tarefa de lembrete, venda de recebimento e gasto de movimentação de estoque. O FAQ explica esses pontos, correções, conexão, uso por áudio, atividades, teste e limites do apoio técnico. Previsão do tempo, relatórios e lembretes são apresentados conforme disponibilidade, sem prometer envio automático para toda tarefa. CTs, treino e desempenho esportivo não aparecem como funcionalidades atuais ou futuras.
 
 As demonstrações usam dados fictícios. Não enviam WhatsApp, não salvam registros e não fazem chamadas à IA.

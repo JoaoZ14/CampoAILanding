@@ -21,7 +21,7 @@ const catalog = {
     { code: 'premium', name: 'Business', priceBrl: 199, period: 'mês', customerSegment: 'company', seats: 5, highlight: true, bullets: ['Até 5 números de WhatsApp no mesmo plano'] }
   ]
 };
-const news = { items: Array.from({ length: 6 }, (_, index) => ({ title: `Notícia de teste ${index + 1}`, url: 'https://www.embrapa.br/', source: 'Embrapa', publishedAt: '2026-10-01', image: '' })) };
+const news = { fetchedAt: new Date().toISOString(), items: Array.from({ length: 6 }, (_, index) => ({ title: 'Notícia de teste ' + (index + 1), url: 'https://www.embrapa.br/', source: 'Embrapa', publishedAt: '2026-10-01', image: '' })) };
 let checks = 0;
 function check(condition, description) { assert.ok(condition, description); checks++; }
 async function text(page, selector) { return page.locator(selector).innerText(); }
@@ -29,11 +29,27 @@ async function noOverflow(page, label) {
   const sizes = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, width: innerWidth }));
   check(sizes.scroll <= sizes.width + 1, `${label}: horizontal overflow ${JSON.stringify(sizes)}`);
 }
-async function pageFor(width, height = 900, payload = catalog, reducedMotion = 'reduce') {
+async function pageFor(width, height = 900, payload = catalog, reducedMotion = 'reduce', newsMode = 'ok') {
   const context = await browser.newContext({ viewport: { width, height }, reducedMotion });
+  const newsRequests = [];
+  const newsControl = { mode: newsMode };
   await context.route('**/api/plans', (route) => route.fulfill({ status: payload === null ? 503 : 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(payload || {}) }));
   await context.route('**/noticias.json', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify(news) }));
-  await context.route('**/api/noticias', (route) => route.fulfill({ contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(news) }));
+  await context.route('**/api/noticias', async (route) => {
+    newsRequests.push(route.request().url());
+    const primary = new URL(route.request().url()).hostname === 'app.useaggi.com';
+    if (newsControl.mode === 'timeout-primary' && primary) {
+      await new Promise(resolve => setTimeout(resolve, 4500));
+      await route.fulfill({ status: 503, body: '{}' }).catch(() => {});
+      return;
+    }
+    const unavailable = newsControl.mode === 'down' || (newsControl.mode === 'primary-down' && primary);
+    let data = news;
+    if (newsControl.mode === 'empty') data = { items: [] };
+    if (newsControl.mode === 'malformed') data = { unexpected: true };
+    if (newsControl.mode === 'unsafe') data = { items: [null, { title: 'Unsafe', url: 'javascript:alert(1)' }, ...news.items] };
+    await route.fulfill({ status: unavailable ? 503 : 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(data) });
+  });
   // No registrations, WhatsApp sends or payments. Clipboard is scoped to this test.
   await context.addInitScript(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (value) => { window.__copied = value; } } }));
   const page = await context.newPage();
@@ -43,11 +59,12 @@ async function pageFor(width, height = 900, payload = catalog, reducedMotion = '
   page.on('response', (response) => { if (response.url().startsWith(base) && response.status() >= 400) failedLocal.push(response.url()); });
   await page.goto(base, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
-  return { context, page, errors, failedLocal };
+  return { context, page, errors, failedLocal, newsRequests, newsControl };
 }
 
 try {
-  const { context, page, errors, failedLocal } = await pageFor(1440);
+  const { context, page, errors, failedLocal, newsRequests } = await pageFor(1440);
+  check(newsRequests.length === 0, 'News API is not called before its section is opened');
   check(await page.locator('h1').count() === 1, 'One main heading');
   check(await page.locator('link[rel="canonical"]').getAttribute('href') === 'https://useaggi.com/', 'Landing canonical uses the main domain');
   check(await page.locator('.header-login').getAttribute('href') === 'https://app.useaggi.com/', 'Login opens the app subdomain root');
@@ -113,6 +130,8 @@ try {
   await page.locator('footer a[href="#noticias"]').click();
   check(await page.locator('#noticias').evaluate((node) => node.open), 'News anchor opens section');
   await page.waitForFunction(() => document.querySelector('#noticias-wrap').getBoundingClientRect().height > 230);
+  check(newsRequests.length === 1 && newsRequests[0].includes('app.useaggi.com'), 'Local preview uses the configured live API instead of the old JSON file');
+  check((await text(page, '#noticias-status')).includes('Última atualização'), 'News feed exposes its update date');
   check(await page.locator('.news-card').nth(3).evaluate((node) => node.inert), 'Clipped news is not focusable');
   await page.locator('#noticias-ver-mais').click();
   check(await page.locator('#noticias-ver-mais').getAttribute('aria-expanded') === 'true', 'Expand news');
@@ -188,5 +207,42 @@ try {
   check((await text(update.page, '#plans-grid')).includes('37 análises'), 'API supersedes the analysis cap snapshot');
   check(await update.page.locator('#plans-grid .price strong').first().innerText() === '31,50', 'API decimal currency formatting');
   await update.context.close();
+  const backup = await pageFor(390, 844, catalog, 'reduce', 'primary-down');
+  await backup.page.locator('#noticias summary').click();
+  await backup.page.waitForFunction(() => document.querySelector('#noticias-grid .news-card__title')?.textContent.includes('Notícia de teste'));
+  check(backup.newsRequests.length === 2 && backup.newsRequests[1].includes('up.railway.app'), 'Unavailable app domain falls back to the operational Railway endpoint');
+  check(await backup.page.locator('#noticias-atualizar').isEnabled(), 'News refresh is available after fallback');
+  backup.newsControl.mode = 'down';
+  await backup.page.locator('#noticias-atualizar').click();
+  await backup.page.waitForFunction(() => document.querySelector('#noticias-status').textContent.includes('notícias salvas'));
+  check(await backup.page.locator('.news-card').count() === 6, 'A provider failure preserves cached articles with an explicit stale status');
+  await backup.page.evaluate(() => localStorage.setItem('campoai-noticias-cache::https://app.useaggi.com/api/noticias', JSON.stringify({
+    savedAt: Date.now(), payload: { fetchedAt: '2026-08-31T00:39:53.432Z', items: [{ title: 'Arquivo antigo', url: 'https://www.embrapa.br/' }] }
+  })));
+  await backup.page.locator('#noticias-atualizar').click();
+  await backup.page.waitForFunction(() => document.querySelector('#noticias-status').textContent.includes('Não conseguimos carregar'));
+  check(!(await text(backup.page, '#noticias-grid')).includes('Arquivo antigo'), 'Expired articles are not presented as fresh news');
+  check(await backup.page.locator('.news-card').count() === 3, 'Provider failure shows identifiable source links');
+  backup.newsControl.mode = 'ok';
+  await backup.page.locator('#noticias-atualizar').click();
+  await backup.page.waitForFunction(() => document.querySelector('#noticias-status').textContent.includes('Última atualização'));
+  check((await text(backup.page, '#noticias-grid')).includes('Notícia de teste'), 'Refresh recovers the feed after an outage');
+  await noOverflow(backup.page, '390px news toolbar');
+  await backup.page.locator('#noticias').screenshot({ path: resolve(artifacts, 'mobile-news.png') });
+  check(backup.errors.length === 0, 'No script errors during cache and retry paths');
+  await backup.context.close();
+  for (const mode of ['empty', 'malformed', 'unsafe', 'timeout-primary']) {
+    const scenario = await pageFor(320, 844, catalog, 'reduce', mode);
+    await scenario.page.locator('#noticias summary').click();
+    await scenario.page.waitForFunction(() => document.querySelector('#noticias-grid').getAttribute('aria-busy') === 'false');
+    if (mode === 'empty') check((await text(scenario.page, '#noticias-status')).includes('Ainda não há notícias'), 'Empty feed is explained rather than silently replaced');
+    if (mode === 'malformed') check((await text(scenario.page, '#noticias-status')).includes('Não conseguimos carregar'), 'Malformed feeds end loading and offer a retry');
+    if (mode === 'unsafe') check(await scenario.page.locator('.news-card').count() === 6, 'Invalid records and unsafe article URLs are skipped');
+    if (mode === 'timeout-primary') check(scenario.newsRequests.length === 2 && (await text(scenario.page, '#noticias-grid')).includes('Notícia de teste'), 'A stalled request times out and falls back');
+    await noOverflow(scenario.page, '320px ' + mode + ' news');
+    check(await scenario.page.locator('#noticias-atualizar').isEnabled(), mode + ': loading finishes with refresh available');
+    check(scenario.errors.length === 0, mode + ': no browser errors');
+    await scenario.context.close();
+  }
   console.log(`${checks} verificações passaram. Capturas em ${artifacts}`);
 } finally { await browser.close(); await new Promise((done) => server.close(done)); }

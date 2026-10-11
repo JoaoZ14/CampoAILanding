@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#193e30">
   <meta name="description" content="Organize a agricultura e a criação de animais com o AGGI. Peça à Lida no WhatsApp para registrar gastos, produção, estoque e tarefas. Confira tudo no app. Teste grátis.">
   <meta name="campoai-noticias-json" content="https://app.useaggi.com/api/noticias">
+  <meta name="campoai-noticias-fallback" content="https://campoai-production-b7c7.up.railway.app/api/noticias">
   <meta name="campoai-cotacoes-json" content="cotacoes.json">
   <meta name="agassist-plans-json" content="https://app.useaggi.com/api/plans">
   <link rel="canonical" href="https://useaggi.com/">
@@ -180,7 +181,7 @@
 
   <section class="resources-section" aria-labelledby="resources-title"><div class="container"><div class="resources-heading"><span class="eyebrow">UMA OLHADA NO AGRO</span><h2 id="resources-title">Informação para acompanhar o campo.</h2></div>
     <details id="cotacoes" class="resource"><summary><span>Cotações<small>Preços com fonte, unidade e data de referência.</small></span></summary><div class="resource-content"><p>Confira a atualização de cada preço. Registros antigos são identificados como históricos.</p><p id="cotacoes-status" role="status">Carregando cotações…</p><div class="cotacoes-controls"><label for="cotacoes-commodity">Produto<select id="cotacoes-commodity"></select></label><label for="cotacoes-uf">UF<select id="cotacoes-uf"></select></label></div><ul id="cotacoes-grid" class="cotacoes-grid" aria-live="polite" aria-busy="true"></ul><p id="cotacoes-updated" class="cotacoes-updated" hidden></p></div></details>
-    <details id="noticias" class="resource"><summary><span>Notícias e fontes do agro<small>Leituras para explorar quando você quiser.</small></span></summary><div class="resource-content"><p id="noticias-status" role="status">Carregando notícias…</p><div class="noticias-stack"><div class="noticias-wrap" id="noticias-wrap"><ul id="noticias-grid" class="news-grid" aria-live="polite" aria-busy="true"></ul><div id="noticias-fade" class="noticias-fade" hidden aria-hidden="true"></div></div><button type="button" id="noticias-ver-mais" class="btn btn-outline noticias-ver-mais" hidden aria-controls="noticias-grid" aria-expanded="false">Ver mais</button></div></div></details>
+    <details id="noticias" class="resource"><summary><span>Notícias e fontes do agro<small>Leituras para explorar quando você quiser.</small></span></summary><div class="resource-content"><div class="news-toolbar"><p id="noticias-status" role="status">Abra esta seção para carregar as notícias.</p><button id="noticias-atualizar" class="btn btn-outline" type="button" hidden>Atualizar</button></div><div class="noticias-stack"><div class="noticias-wrap" id="noticias-wrap"><ul id="noticias-grid" class="news-grid" aria-live="polite" aria-busy="false"></ul><div id="noticias-fade" class="noticias-fade" hidden aria-hidden="true"></div></div><button type="button" id="noticias-ver-mais" class="btn btn-outline noticias-ver-mais" hidden aria-controls="noticias-grid" aria-expanded="false">Ver mais</button></div></div></details>
   </div></section>
 </main>
 

@@ -346,6 +346,9 @@ section.resources-section { padding-block: 65px; }
 .resource > summary small { display: block; font-size: .72rem; font-weight: 400; color: var(--muted); margin-top: 5px; }
 .resource-content { padding-bottom: 25px; }
 .resource-content > p, .cotacoes-updated { color: var(--muted); font-size: .74rem; margin-bottom: 15px; }
+.news-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-block: 16px 20px; }
+.news-toolbar p { flex: 1 1 220px; color: var(--muted); font-size: .85rem; line-height: 1.7; }
+.news-toolbar .btn { min-height: 44px; padding: 10px 18px; }
 .cotacoes-controls { display: flex; gap: 14px; margin-block: 18px; }
 .cotacoes-controls label { display: grid; gap: 6px; color: var(--muted); font-size: .65rem; }
 .cotacoes-controls select { background: white; color: var(--ink); border: 1px solid var(--line); border-radius: 9px; min-height: 44px; padding: 8px 14px; font-size: .8rem; min-width: 150px; }
