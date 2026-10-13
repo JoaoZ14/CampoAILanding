@@ -41,13 +41,13 @@ async function pageFor(width, height = 900, payload = catalog, reducedMotion = '
   await context.route('**/noticias.json', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify(news) }));
   await context.route('**/api/noticias', async (route) => {
     newsRequests.push(route.request().url());
-    const primary = new URL(route.request().url()).hostname === 'app.useaggi.com';
+    const primary = new URL(route.request().url()).hostname === 'campoai-production-b7c7.up.railway.app';
     if (newsControl.mode === 'timeout-primary' && primary) {
       await new Promise(resolve => setTimeout(resolve, 4500));
       await route.fulfill({ status: 503, body: '{}' }).catch(() => {});
       return;
     }
-    const unavailable = newsControl.mode === 'down' || (newsControl.mode === 'primary-down' && primary);
+    const unavailable = newsControl.mode === 'down';
     let data = news;
     if (newsControl.mode === 'empty') data = { items: [] };
     if (newsControl.mode === 'malformed') data = { unexpected: true };
@@ -75,7 +75,7 @@ try {
   check(await page.locator('link[rel="canonical"]').getAttribute('href') === 'https://useaggi.com/', 'Landing canonical uses the main domain');
   check(await page.locator('.header-login').getAttribute('href') === 'https://app.useaggi.com/', 'Login opens the app subdomain root');
   check(await page.locator('.header-cta').getAttribute('href') === 'https://app.useaggi.com/cadastro?origin=landing', 'Signup opens the React flow on the app subdomain');
-  check(await page.locator('meta[name="agassist-plans-json"]').getAttribute('content') === 'https://app.useaggi.com/api/plans', 'Catalog uses the app API');
+  check(await page.locator('meta[name="agassist-plans-json"]').getAttribute('content') === 'https://campoai-production-b7c7.up.railway.app/api/plans', 'Catalog uses the Railway API');
   check((await text(page, 'body')).includes('Lida, no WhatsApp'), 'Clear product roles');
   const invalidLinks = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].filter((link) => !document.getElementById(link.getAttribute('href').slice(1))).map((link) => link.getAttribute('href')));
   check(invalidLinks.length === 0, `Valid internal anchors: ${invalidLinks}`);
@@ -129,6 +129,7 @@ try {
   await page.locator('[data-plan-segment="personal"]').click();
   check(await page.locator('#plans-grid .plan').count() === 2, 'Switch back to personal');
   check(planControl.requests.length === 1, 'Segment switching reuses the fetched catalog');
+  check(planControl.requests[0] === 'https://campoai-production-b7c7.up.railway.app/api/plans', 'Plans are requested from Railway');
   await page.locator('#planos').screenshot({ path: resolve(artifacts, 'desktop-plans.png') });
   const signupLinks = await page.locator('a[href*="/cadastro"]').evaluateAll((links) => links.map((link) => link.href));
   check(signupLinks.length > 0 && signupLinks.every((href) => href.startsWith('https://app.useaggi.com/cadastro')), 'Signup CTAs point to the app signup');
@@ -140,7 +141,7 @@ try {
   await page.locator('footer a[href="#noticias"]').click();
   check(await page.locator('#noticias').evaluate((node) => node.open), 'News anchor opens section');
   await page.waitForFunction(() => document.querySelector('#noticias-wrap').getBoundingClientRect().height > 230);
-  check(newsRequests.length === 1 && newsRequests[0].includes('app.useaggi.com'), 'Local preview uses the configured live API instead of the old JSON file');
+  check(newsRequests.length === 1 && newsRequests[0] === 'https://campoai-production-b7c7.up.railway.app/api/noticias', 'News is requested directly from Railway');
   check((await text(page, '#noticias-status')).includes('Última atualização'), 'News feed exposes its update date');
   check(await page.locator('.news-card').nth(3).evaluate((node) => node.inert), 'Clipped news is not focusable');
   await page.locator('#noticias-ver-mais').click();
@@ -284,16 +285,16 @@ try {
   check(await noScriptPage.locator('#plans-grid .price').count() === 0,'Static HTML contains no offer prices');
   check(await noScriptPage.locator('#planos noscript a').isVisible(),'Without JavaScript the checkout link remains accessible');
   await noScript.close();
-  const backup = await pageFor(390, 844, catalog, 'reduce', 'primary-down');
+  const backup = await pageFor(390, 844, catalog);
   await backup.page.locator('#noticias summary').click();
   await backup.page.waitForFunction(() => document.querySelector('#noticias-grid .news-card__title')?.textContent.includes('Notícia de teste'));
-  check(backup.newsRequests.length === 2 && backup.newsRequests[1].includes('up.railway.app'), 'Unavailable app domain falls back to the operational Railway endpoint');
-  check(await backup.page.locator('#noticias-atualizar').isEnabled(), 'News refresh is available after fallback');
+  check(backup.newsRequests.length === 1 && backup.newsRequests[0] === 'https://campoai-production-b7c7.up.railway.app/api/noticias', 'Railway is the primary news endpoint');
+  check(await backup.page.locator('#noticias-atualizar').isEnabled(), 'News refresh is available after loading');
   backup.newsControl.mode = 'down';
   await backup.page.locator('#noticias-atualizar').click();
   await backup.page.waitForFunction(() => document.querySelector('#noticias-status').textContent.includes('notícias salvas'));
   check(await backup.page.locator('.news-card').count() === 6, 'A provider failure preserves cached articles with an explicit stale status');
-  await backup.page.evaluate(() => localStorage.setItem('campoai-noticias-cache::https://app.useaggi.com/api/noticias', JSON.stringify({
+  await backup.page.evaluate(() => localStorage.setItem('campoai-noticias-cache::https://campoai-production-b7c7.up.railway.app/api/noticias', JSON.stringify({
     savedAt: Date.now(), payload: { fetchedAt: '2026-08-31T00:39:53.432Z', items: [{ title: 'Arquivo antigo', url: 'https://www.embrapa.br/' }] }
   })));
   await backup.page.locator('#noticias-atualizar').click();
@@ -310,14 +311,15 @@ try {
   await backup.context.close();
   for (const mode of ['empty', 'malformed', 'unsafe', 'timeout-primary']) {
     const scenario = await pageFor(320, 844, catalog, 'reduce', mode);
-    const response = scenario.page.waitForResponse(response => response.url().includes('/api/noticias'));
+    const response = mode === 'timeout-primary' ? null : scenario.page.waitForResponse(response => response.url().includes('/api/noticias'));
     await scenario.page.locator('#noticias summary').click();
-    await response;
+    if (response) await response;
+    else await scenario.page.waitForFunction(() => document.querySelector('#noticias-status').textContent.includes('Não conseguimos carregar'));
     await scenario.page.waitForFunction(() => document.querySelector('#noticias-grid').getAttribute('aria-busy') === 'false');
     if (mode === 'empty') check((await text(scenario.page, '#noticias-status')).includes('Ainda não há notícias'), 'Empty feed is explained rather than silently replaced');
     if (mode === 'malformed') check((await text(scenario.page, '#noticias-status')).includes('Não conseguimos carregar'), 'Malformed feeds end loading and offer a retry');
     if (mode === 'unsafe') check(await scenario.page.locator('.news-card').count() === 6, 'Invalid records and unsafe article URLs are skipped');
-    if (mode === 'timeout-primary') check(scenario.newsRequests.length === 2 && (await text(scenario.page, '#noticias-grid')).includes('Notícia de teste'), 'A stalled request times out and falls back');
+    if (mode === 'timeout-primary') check(scenario.newsRequests.length === 1 && (await text(scenario.page, '#noticias-status')).includes('Não conseguimos carregar'), 'A stalled Railway request times out without calling the app domain');
     await noOverflow(scenario.page, '320px ' + mode + ' news');
     check(await scenario.page.locator('#noticias-atualizar').isEnabled(), mode + ': loading finishes with refresh available');
     check(scenario.errors.length === 0, mode + ': no browser errors');

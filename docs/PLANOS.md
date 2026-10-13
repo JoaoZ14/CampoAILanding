@@ -1,7 +1,10 @@
 # Catálogo da landing
 
 A seção de planos consulta o endpoint definido no meta `agassist-plans-json`
-de `index.html`, atualmente `https://app.useaggi.com/api/plans`.
+de `index.html`, atualmente `https://campoai-production-b7c7.up.railway.app/api/plans`.
+
+As notícias também consultam o backend do Railway. `app.useaggi.com` é usado
+nos links de acesso, cadastro e contratação, não nas chamadas da API da landing.
 
 Não há catálogo de ofertas, preços ou franquias no HTML ou JavaScript da landing.
 Os cartões seguem a quantidade e a ordem dos planos retornados pela API. Nomes,
