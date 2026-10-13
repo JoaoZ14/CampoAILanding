@@ -158,51 +158,58 @@
       setText('copy-status', 'A cópia automática não está disponível. A mensagem foi selecionada para você copiar.');
     }
   });
-  // Offer 2026-10; requires migration_025 in the backend; refreshed lazily below.
-  const fallbackPlans = [
-    { code: 'lite', name: 'Essencial', priceBrl: 39, customerSegment: 'personal', seats: 1, highlight: false, bullets: ['Até 40 análises de IA por mês'] },
-    { code: 'basic', name: 'Starter', priceBrl: 79, customerSegment: 'personal', seats: 1, highlight: true, bullets: ['Até 100 análises de IA por mês'] },
-    { code: 'premium', name: 'Team', priceBrl: 179, customerSegment: 'personal', seats: 3, highlight: false, bullets: ['Até 250 análises de IA por mês'] },
-    { code: 'premium', name: 'Business', priceBrl: 299, customerSegment: 'company', seats: 5, highlight: true, bullets: ['Até 400 análises de IA por mês'] }
-  ];
-  const presentations = {
-    lite: { tag: 'PARA COMEÇAR', description: 'Para usar no seu ritmo, com um limite mensal definido.' },
-    basic: { tag: 'PARA USAR COM FREQUÊNCIA', description: 'Mais liberdade para as perguntas e tarefas da rotina.' },
-    premium: { tag: 'PARA DIVIDIR O USO', description: 'Uma assinatura para quem usa com equipe ou família.' },
-    company: { tag: 'PARA SUA EMPRESA', description: 'Cadastro com CNPJ e uma assinatura para a equipe.' }
-  };
+  // The backend owns the offer, including its order, limits and copy.
   const grid = document.getElementById('plans-grid');
   const segments = [...document.querySelectorAll('[data-plan-segment]')];
   const checkoutUrl = 'https://app.useaggi.com/planos';
-  const paymentNote = 'A contratação e as opções de pagamento ficam na página de planos. Confira ali os limites e condições finais, As franquias renovam todo mês, inclusive no anual, sem acumular. Não há cobrança automática de excedente.';
-  let plans = fallbackPlans;
+  const paymentNote = 'Confira as opções de pagamento e as condições da assinatura na página de planos.';
+  let plans = [];
+  let notes = [];
   let segment = 'personal';
-  let catalogUnavailable = false;
+  let catalogState = 'idle';
   function element(tag, className, text) {
     const node = document.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node;
   }
   function renderPlans() {
     if (!grid) return;
     grid.dataset.segment = segment;
+    grid.dataset.state = catalogState;
+    grid.setAttribute('aria-busy', String(catalogState === 'loading'));
     segments.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.planSegment === segment)));
-    grid.replaceChildren(...plans.filter((plan) => plan.customerSegment === segment).map((plan) => {
-      const presentation = presentations[segment === 'company' ? 'company' : plan.code];
+    const selectedPlans = plans.filter((plan) => plan.customerSegment === segment);
+    grid.style.setProperty('--plan-columns', String(Math.max(1, Math.min(selectedPlans.length, 3))));
+    if (catalogState !== 'loaded' || selectedPlans.length === 0) {
+      const status = element('div', 'plans-state');
+      status.setAttribute('role', 'status');
+      const message = catalogState === 'error' ? 'Não conseguimos carregar os planos agora.'
+        : catalogState === 'loaded' ? 'Não há planos disponíveis para esta opção no momento.'
+        : 'Carregando os planos…';
+      status.append(element('p', '', message));
+      if (catalogState === 'error') {
+        const retry = element('button', 'btn btn-outline', 'Tentar novamente');
+        retry.type = 'button';
+        retry.addEventListener('click', updatePlans);
+        status.append(retry);
+      }
+      if (catalogState === 'error' || catalogState === 'loaded') {
+        const link = element('a', 'text-link', 'Abrir página de planos');
+        link.href = checkoutUrl;
+        status.append(link);
+      }
+      grid.replaceChildren(status);
+      setText('plans-note', paymentNote);
+      return;
+    }
+    grid.replaceChildren(...selectedPlans.map((plan) => {
       const article = element('article', `plan${plan.highlight ? ' plan-featured' : ''}`);
-      article.append(element('span', 'plan-tag', presentation.tag), element('h3', '', plan.name), element('p', 'plan-description', presentation.description));
+      const tag = segment === 'company' ? 'PARA SUA EMPRESA' : plan.seats > 1 ? 'PARA COMPARTILHAR' : 'PESSOAL';
+      article.append(element('span', 'plan-tag', tag), element('h3', '', plan.name));
+      if (plan.summary) article.append(element('p', 'plan-description', plan.summary));
       const price = element('p', 'price');
       const decimals = Number.isInteger(plan.priceBrl) ? 0 : 2;
       price.append(element('span', '', 'R$'), element('strong', '', plan.priceBrl.toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: 2 })), element('span', '', '/mês'));
       const list = element('ul', 'check-list');
-      const analysisBullet = plan.bullets.find((bullet) => /análises/i.test(bullet));
-      const limit = analysisBullet?.match(/até\s+(\d+)\s+análises/i);
-      const bullets = [];
-      if (limit) bullets.push(`Até ${limit[1]} análises de IA por mês${plan.seats > 1 ? ", divididas entre os números" : ""}`);
-      else if (analysisBullet && /ilimitad/i.test(analysisBullet)) bullets.push('Análises ilimitadas, com uso justo');
-      bullets.push(plan.seats === 1 ? '1 número de WhatsApp' : `Até ${plan.seats} números de WhatsApp`);
-      if (segment === 'company') bullets.push('Cadastro e contratação com CNPJ');
-      else if (plan.seats > 1) bullets.push('Uma assinatura centralizada');
-      bullets.push('Texto, fotos e áudios');
-      list.append(...bullets.map((bullet) => element('li', '', bullet)));
+      list.append(...plan.bullets.map((bullet) => element('li', '', bullet)));
       const link = element('a', `btn ${plan.highlight ? 'btn-primary' : 'btn-outline'}`, `Ver ${plan.name}`);
       link.href = checkoutUrl;
       const icon = document.createElement('span');
@@ -212,31 +219,42 @@
       link.append(icon);
       article.append(price, list, link); return article;
     }));
-    setText('plans-note', catalogUnavailable ? `Não foi possível atualizar os valores agora. Confira o catálogo na página de planos antes de contratar. ${paymentNote}` : paymentNote);
+    setText('plans-note', [paymentNote, ...notes].join(' '));
   }
   segments.forEach((button) => button.addEventListener('click', () => { segment = button.dataset.planSegment; renderPlans(); }));
   function validPlan(plan) {
-    return plan && ['lite', 'basic', 'premium'].includes(plan.code) && ['personal', 'company'].includes(plan.customerSegment)
+    return plan && typeof plan.code === 'string' && /^[a-z0-9_-]{1,60}$/i.test(plan.code) && ['personal', 'company'].includes(plan.customerSegment)
       && typeof plan.name === 'string' && plan.name.trim().length > 0 && plan.name.length <= 60
       && Number.isFinite(plan.priceBrl) && plan.priceBrl > 0 && Number.isInteger(plan.seats) && plan.seats > 0 && plan.seats <= 100
-      && Array.isArray(plan.bullets) && plan.bullets.every((bullet) => typeof bullet === 'string');
+      && (plan.summary == null || (typeof plan.summary === 'string' && plan.summary.length <= 2000))
+      && (plan.highlight == null || typeof plan.highlight === 'boolean')
+      && (plan.period == null || plan.period === 'mês')
+      && Array.isArray(plan.bullets) && plan.bullets.length <= 40 && plan.bullets.every((bullet) => typeof bullet === 'string' && bullet.length <= 2000);
   }
   async function updatePlans() {
+    if (catalogState === 'loading') return;
+    catalogState = 'loading';
+    renderPlans();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 6000);
     try {
       const url = new URL(document.querySelector('meta[name="agassist-plans-json"]')?.content);
       if (!['https:', 'http:'].includes(url.protocol)) throw new Error('Invalid catalog URL');
-      const response = await fetch(url.href, { signal: controller.signal, credentials: 'omit' });
+      const response = await fetch(url.href, { signal: controller.signal, credentials: 'omit', cache: 'no-store' });
       if (!response.ok) throw new Error('Catalog unavailable');
       const catalog = await response.json();
       if (!catalog.ok || catalog.currency !== 'BRL' || !Array.isArray(catalog.plans)) throw new Error('Invalid catalog');
-      const verified = catalog.plans.filter(validPlan);
-      if (verified.length !== catalog.plans.length || verified.length > 12 || !verified.some((plan) => plan.customerSegment === 'personal') || !verified.some((plan) => plan.customerSegment === 'company')) throw new Error('Incomplete catalog');
-      if (verified.some((plan) => plan.period && plan.period !== 'mês')) throw new Error('Unsupported period');
-      const order = { lite: 0, basic: 1, premium: 2 };
-      plans = verified.sort((a, b) => order[a.code] - order[b.code]); catalogUnavailable = false;
-    } catch { catalogUnavailable = true; }
+      // The backend may fall back to its own defaults when the database is unavailable.
+      // Those defaults are not a confirmed current offer.
+      if (catalog.catalogSource === 'fallback') throw new Error('Unconfirmed catalog');
+      if (catalog.plans.length > 60 || !catalog.plans.every(validPlan)) throw new Error('Invalid offers');
+      const identities = new Set(catalog.plans.map((plan) => `${plan.customerSegment}:${plan.code}`));
+      if (identities.size !== catalog.plans.length) throw new Error('Duplicate offers');
+      if (catalog.notes != null && (!Array.isArray(catalog.notes) || catalog.notes.length > 40 || !catalog.notes.every(note => typeof note === 'string' && note.length <= 2000))) throw new Error('Invalid notes');
+      plans = catalog.plans;
+      notes = catalog.notes ?? [];
+      catalogState = 'loaded';
+    } catch { plans = []; notes = []; catalogState = 'error'; }
     finally { clearTimeout(timer); renderPlans(); }
   }
   if (grid) {

@@ -14,12 +14,11 @@ await new Promise((done) => server.listen(0, '127.0.0.1', done));
 const base = `http://127.0.0.1:${server.address().port}/`;
 const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 'chrome', headless: true });
 const catalog = {
-  ok: true, currency: 'BRL', plans: [
-    { code: 'lite', name: 'Essencial', priceBrl: 39, period: 'mês', customerSegment: 'personal', seats: 1, highlight: false, bullets: ['Até 40 análises de IA por mês'] },
-    { code: 'basic', name: 'Starter', priceBrl: 79, period: 'mês', customerSegment: 'personal', seats: 1, highlight: true, bullets: ['Até 100 análises de IA por mês'] },
+  ok: true, currency: 'BRL', catalogSource: 'database', plans: [
+    { code: 'basic', name: 'Individual', priceBrl: 59.9, period: 'mês', customerSegment: 'personal', seats: 1, highlight: true, summary: 'Sua rotina organizada com a Lida.', bullets: ['Até 100 análises de IA por mês', 'Um número de WhatsApp', 'Uso direto do app sem consumir análises'] },
     { code: 'premium', name: 'Team', priceBrl: 179, period: 'mês', customerSegment: 'personal', seats: 3, highlight: false, bullets: ['Até 3 números de WhatsApp no mesmo plano', 'Até 250 análises de IA por mês, compartilhadas entre os números'] },
     { code: 'premium', name: 'Business', priceBrl: 299, period: 'mês', customerSegment: 'company', seats: 5, highlight: true, bullets: ['Até 5 números de WhatsApp no mesmo plano', 'Até 400 análises de IA por mês, compartilhadas entre os números'] }
-  ]
+  ], notes: ['Franquias renovam todo mês, sem acumular.']
 };
 const news = { fetchedAt: new Date().toISOString(), items: Array.from({ length: 6 }, (_, index) => ({ title: 'Notícia de teste ' + (index + 1), url: 'https://www.embrapa.br/', source: 'Embrapa', publishedAt: '2026-10-01', image: '' })) };
 let checks = 0;
@@ -33,7 +32,12 @@ async function pageFor(width, height = 900, payload = catalog, reducedMotion = '
   const context = await browser.newContext({ viewport: { width, height }, reducedMotion });
   const newsRequests = [];
   const newsControl = { mode: newsMode };
-  await context.route('**/api/plans', (route) => route.fulfill({ status: payload === null ? 503 : 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(payload || {}) }));
+  const planControl = { payload, mode: 'ok', requests: [] };
+  await context.route('**/api/plans', async (route) => {
+    planControl.requests.push(route.request().url());
+    if (planControl.mode === 'timeout') await new Promise(resolve => setTimeout(resolve, 7500));
+    await route.fulfill({ status: planControl.payload === null ? 503 : 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: planControl.mode === 'invalid-json' ? 'not json' : JSON.stringify(planControl.payload ?? {}) }).catch(() => {});
+  });
   await context.route('**/noticias.json', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify(news) }));
   await context.route('**/api/noticias', async (route) => {
     newsRequests.push(route.request().url());
@@ -59,12 +63,14 @@ async function pageFor(width, height = 900, payload = catalog, reducedMotion = '
   page.on('response', (response) => { if (response.url().startsWith(base) && response.status() >= 400) failedLocal.push(response.url()); });
   await page.goto(base, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
-  return { context, page, errors, failedLocal, newsRequests, newsControl };
+  return { context, page, errors, failedLocal, newsRequests, newsControl, planControl };
 }
 
 try {
-  const { context, page, errors, failedLocal, newsRequests } = await pageFor(1440);
+  const { context, page, errors, failedLocal, newsRequests, planControl } = await pageFor(1440);
   check(newsRequests.length === 0, 'News API is not called before its section is opened');
+  check(planControl.requests.length === 0, 'Plan API loads only near the plans section');
+  check(await page.locator('#plans-grid .price').count() === 0, 'No embedded prices before the backend answers');
   check(await page.locator('h1').count() === 1, 'One main heading');
   check(await page.locator('link[rel="canonical"]').getAttribute('href') === 'https://useaggi.com/', 'Landing canonical uses the main domain');
   check(await page.locator('.header-login').getAttribute('href') === 'https://app.useaggi.com/', 'Login opens the app subdomain root');
@@ -81,7 +87,6 @@ try {
   await noOverflow(page, 'Desktop capabilities');
   await page.locator('#recursos').screenshot({ path: resolve(artifacts, 'desktop-capabilities.png') });
   const resultTitles = { gasto: 'Diesel', agenda: 'Revisar a bomba', producao: 'Colheita de cebolinha', estoque: 'Ração Crescimento', historico: 'Despesas de diesel', duvida: 'Apoio para sua observação' };
-  check(await page.locator('#plans-grid a').evaluateAll(links => links.length > 0 && links.every(link => link.href === 'https://app.useaggi.com/planos')), 'Dynamically rendered plan links use the new domain');
   for (const [key, title] of Object.entries(resultTitles)) {
     await page.locator(`[data-example="${key}"]`).click();
     check(await text(page, '#example-result-title') === title, `${key} example shows its result`);
@@ -109,16 +114,21 @@ try {
   check(await page.evaluate(() => window.__copied) === 'Oi, Lida! Quero começar a organizar minha propriedade.', 'Copy first message');
   check((await text(page, '#copy-first-message')).includes('copiada'), 'Clipboard success feedback');
   await page.locator('#planos').scrollIntoViewIfNeeded();
-  await page.waitForFunction(() => document.querySelector('#plans-grid').dataset.segment === 'personal');
-  check(await page.locator('#plans-grid .plan').count() === 3, 'Three personal plans');
-  check((await text(page, '#plans-grid')).includes('40 análises'), 'Current analysis cap');
+  await page.waitForFunction(() => document.querySelector('#plans-grid').dataset.state === 'loaded');
+  check(await page.locator('#plans-grid .plan').count() === 2, 'Two personal plans from the backend');
+  check((await text(page, '#plans-grid')).includes('100 análises'), 'Current backend analysis cap');
+  check(await page.locator('#plans-grid .price strong').first().innerText() === '59,90', 'Backend individual price');
+  check((await text(page, '#plans-grid .plan-description')).includes('Sua rotina organizada'), 'Backend description');
+  check((await text(page, '#plans-note')).includes(catalog.notes[0]), 'Backend conditions');
+  check(await page.locator('#plans-grid a').evaluateAll(links => links.length > 0 && links.every(link => link.href === 'https://app.useaggi.com/planos')), 'Dynamically rendered plan links use the new domain');
   await page.locator('[data-plan-segment="company"]').click();
   check(await page.locator('#plans-grid .plan').count() === 1, 'One company plan');
   check((await text(page, '#plans-grid')).includes('Business'), 'Business plan');
   check(await text(page, '#plans-grid .price strong') === '299', 'Business price');
   check((await text(page, '#plans-grid')).includes('Até 5 números'), 'Company seat maximum');
   await page.locator('[data-plan-segment="personal"]').click();
-  check(await page.locator('#plans-grid .plan').count() === 3, 'Switch back to personal');
+  check(await page.locator('#plans-grid .plan').count() === 2, 'Switch back to personal');
+  check(planControl.requests.length === 1, 'Segment switching reuses the fetched catalog');
   await page.locator('#planos').screenshot({ path: resolve(artifacts, 'desktop-plans.png') });
   const signupLinks = await page.locator('a[href*="/cadastro"]').evaluateAll((links) => links.map((link) => link.href));
   check(signupLinks.length > 0 && signupLinks.every((href) => href.startsWith('https://app.useaggi.com/cadastro')), 'Signup CTAs point to the app signup');
@@ -176,6 +186,7 @@ try {
     await page.locator('#menu-toggle').click();
     await page.locator('#menu a[href="#planos"]').click();
     check(await page.locator('#menu-toggle').getAttribute('aria-expanded') === 'false', `${width}px menu anchor closes menu`);
+    await page.waitForFunction(() => document.querySelector('#plans-grid').dataset.state === 'loaded');
     await page.locator('[data-plan-segment="company"]').click();
     await noOverflow(page, `${width}px company plan`);
     check((await text(page, '#plans-grid')).includes('Business'), `${width}px company switch`);
@@ -192,21 +203,87 @@ try {
     await context.close();
   }
   const failure = await pageFor(390, 844, null);
+  await failure.page.locator('#planos').scrollIntoViewIfNeeded();
   await failure.page.locator('[data-plan-segment="company"]').click();
-  await failure.page.waitForFunction(() => document.querySelector('#plans-note').textContent.includes('Não foi possível atualizar'));
-  check((await text(failure.page, '#plans-grid')).includes('Business'), 'Catalog failure preserves correct company segment');
-  check(await text(failure.page, '#plans-grid .price strong') === '299', 'Catalog failure uses verified snapshot');
+  await failure.page.waitForFunction(() => document.querySelector('#plans-grid').dataset.state === 'error');
+  check(await failure.page.locator('#plans-grid .price').count() === 0, 'API failure never shows fallback prices');
+  check(await failure.page.locator('#plans-grid .plan').count() === 0, 'API failure never invents offers');
+  check(await failure.page.getByRole('button', {name:'Tentar novamente',exact:true}).isVisible(), 'API failure offers a retry');
+  check(await failure.page.locator('#plans-grid a').getAttribute('href') === 'https://app.useaggi.com/planos', 'Checkout remains accessible during an outage');
+  await noOverflow(failure.page, '390px unavailable plans');
+  await failure.page.locator('#planos').screenshot({path:resolve(artifacts,'mobile-plans-unavailable.png')});
+  failure.planControl.payload = catalog;
+  await failure.page.getByRole('button', {name:'Tentar novamente',exact:true}).click();
+  await failure.page.waitForFunction(() => document.querySelector('#plans-grid').dataset.state === 'loaded');
+  check((await text(failure.page, '#plans-grid')).includes('Business'), 'Retry preserves the chosen company segment');
+  check(failure.planControl.requests.length === 2, 'Retry fetches the backend again');
+  check(await failure.page.locator('#plans-grid').getAttribute('aria-busy') === 'false', 'Retry finishes loading');
   await failure.page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined }));
   await failure.page.locator('#copy-first-message').click();
   check((await text(failure.page, '#copy-first-message')).includes('Selecione'), 'Clipboard fallback does not falsely confirm');
   await failure.context.close();
-  const changed = structuredClone(catalog); changed.plans[0].priceBrl = 31.5; changed.plans[0].bullets[0] = 'Até 37 análises por mês';
+  const changed = structuredClone(catalog);
+  changed.plans[0] = {...changed.plans[0], code:'rural_novo', name:'Novo plano do backend', priceBrl:31.5, summary:'Descrição atualizada pelo backend.', bullets:['Até 37 análises por mês','Benefício novo do backend']};
+  changed.plans.reverse();
   const update = await pageFor(1440, 900, changed);
   await update.page.locator('#planos').scrollIntoViewIfNeeded();
   await update.page.waitForFunction(() => document.querySelector('#plans-grid').textContent.includes('37 análises'));
-  check((await text(update.page, '#plans-grid')).includes('37 análises'), 'API supersedes the analysis cap snapshot');
-  check(await update.page.locator('#plans-grid .price strong').first().innerText() === '31,50', 'API decimal currency formatting');
+  check((await text(update.page, '#plans-grid')).includes('37 análises'), 'API controls the analysis cap');
+  check(await update.page.locator('#plans-grid .price strong').last().innerText() === '31,50', 'API decimal currency formatting');
+  check(await update.page.locator('#plans-grid h3').first().innerText() === 'Team', 'Backend controls display order');
+  check((await text(update.page, '#plans-grid')).includes('Novo plano do backend'), 'New plan codes need no landing edits');
+  check((await text(update.page, '#plans-grid')).includes('Benefício novo do backend'), 'Backend benefits are preserved');
+  check((await text(update.page, '#plans-grid')).includes('Descrição atualizada pelo backend.'), 'Backend summary changes without a landing edit');
   await update.context.close();
+  for (const [label, payload] of [
+    ['invalid-price', {...catalog,plans:[{...catalog.plans[0],priceBrl:-1}]}],
+    ['duplicate', {...catalog,plans:[catalog.plans[0],catalog.plans[0]]}],
+    ['malformed', {ok:true,currency:'BRL',plans:'invalid'}],
+    ['wrong-currency', {...catalog,currency:'USD'}],
+    ['invalid-notes', {...catalog,notes:[{}]}],
+    ['backend-fallback', {...catalog,catalogSource:'fallback'}]
+  ]) {
+    const scenario = await pageFor(320,844,payload);
+    await scenario.page.locator('#planos').scrollIntoViewIfNeeded();
+    await scenario.page.waitForFunction(() => document.querySelector('#plans-grid').dataset.state === 'error');
+    check(await scenario.page.locator('#plans-grid .price').count() === 0, label+': invalid catalog never displays a price');
+    check(scenario.errors.length === 0,label+': no browser errors');
+    await scenario.context.close();
+  }
+  for (const mode of ['invalid-json','timeout']) {
+    const scenario = await pageFor(320);
+    scenario.planControl.mode = mode;
+    await scenario.page.locator('#planos').scrollIntoViewIfNeeded();
+    if (mode === 'timeout') {
+      await scenario.page.waitForFunction(() => document.querySelector('#plans-grid').dataset.state === 'loading');
+      check(await scenario.page.locator('#plans-grid .price').count() === 0, mode+': no price while loading');
+    }
+    await scenario.page.waitForFunction(() => document.querySelector('#plans-grid').dataset.state === 'error');
+    check(await scenario.page.locator('#plans-grid').getAttribute('aria-busy') === 'false',mode+': loading ends');
+    check(await scenario.page.getByRole('button',{name:'Tentar novamente',exact:true}).isVisible(),mode+': retry available');
+    check(scenario.errors.length === 0,mode+': no browser errors');
+    await scenario.context.close();
+  }
+  const personalOnly = await pageFor(320,844,{...catalog,plans:[catalog.plans[0]]});
+  await personalOnly.page.locator('#planos').scrollIntoViewIfNeeded();
+  await personalOnly.page.waitForFunction(() => document.querySelector('#plans-grid').dataset.state === 'loaded');
+  check(await personalOnly.page.locator('#plans-grid .plan').count() === 1,'Catalog may offer only one personal plan');
+  await personalOnly.page.locator('[data-plan-segment="company"]').click();
+  check((await text(personalOnly.page,'#plans-grid')).includes('Não há planos disponíveis'),'Empty segment is explained');
+  check(await personalOnly.page.locator('#plans-grid .price').count() === 0,'No invented company offer');
+  await personalOnly.context.close();
+  const emptyPlans = await pageFor(320,844,{...catalog,plans:[]});
+  await emptyPlans.page.locator('#planos').scrollIntoViewIfNeeded();
+  await emptyPlans.page.waitForFunction(() => document.querySelector('#plans-grid').dataset.state === 'loaded');
+  check((await text(emptyPlans.page,'#plans-grid')).includes('Não há planos disponíveis'),'Empty catalog is explained');
+  check(await emptyPlans.page.locator('#plans-grid .plan').count() === 0,'Empty catalog has no hardcoded offers');
+  await emptyPlans.context.close();
+  const noScript = await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
+  const noScriptPage = await noScript.newPage();
+  await noScriptPage.goto(base);
+  check(await noScriptPage.locator('#plans-grid .price').count() === 0,'Static HTML contains no offer prices');
+  check(await noScriptPage.locator('#planos noscript a').isVisible(),'Without JavaScript the checkout link remains accessible');
+  await noScript.close();
   const backup = await pageFor(390, 844, catalog, 'reduce', 'primary-down');
   await backup.page.locator('#noticias summary').click();
   await backup.page.waitForFunction(() => document.querySelector('#noticias-grid .news-card__title')?.textContent.includes('Notícia de teste'));
@@ -233,7 +310,9 @@ try {
   await backup.context.close();
   for (const mode of ['empty', 'malformed', 'unsafe', 'timeout-primary']) {
     const scenario = await pageFor(320, 844, catalog, 'reduce', mode);
+    const response = scenario.page.waitForResponse(response => response.url().includes('/api/noticias'));
     await scenario.page.locator('#noticias summary').click();
+    await response;
     await scenario.page.waitForFunction(() => document.querySelector('#noticias-grid').getAttribute('aria-busy') === 'false');
     if (mode === 'empty') check((await text(scenario.page, '#noticias-status')).includes('Ainda não há notícias'), 'Empty feed is explained rather than silently replaced');
     if (mode === 'malformed') check((await text(scenario.page, '#noticias-status')).includes('Não conseguimos carregar'), 'Malformed feeds end loading and offer a retry');

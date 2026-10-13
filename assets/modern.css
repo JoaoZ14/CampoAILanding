@@ -254,7 +254,9 @@ header { position: sticky; top: 0; z-index: 30; background: rgb(248 249 243 / 95
 .plan-segments { display: inline-flex; background: #e9eee2; padding: 5px; border-radius: 999px; gap: 4px; }
 .plan-segments button { border: 0; border-radius: 999px; background: transparent; font-size: .78rem; font-weight: 600; padding: 10px 22px; min-height: 44px; }
 .plan-segments button[aria-pressed="true"] { background: var(--ink); color: #fff; }
-.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.plans { display: grid; grid-template-columns: repeat(var(--plan-columns, 3), minmax(0, 1fr)); gap: 16px; }
+.plans-state { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px 24px; padding: 32px 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); text-align: center; }
+.plans-state p { flex-basis: 100%; margin: 0; color: var(--muted); }
 .plan { display: flex; flex-direction: column; padding: 28px; background: var(--white); border: 1px solid var(--line); border-radius: 18px; }
 .plan-featured { background: var(--ink); color: #eaf1e4; border-color: var(--ink); }
 .plan-tag { color: #809471; font-size: .53rem; font-weight: 700; letter-spacing: .06em; min-height: 14px; }
